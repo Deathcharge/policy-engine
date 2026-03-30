@@ -1,32 +1,23 @@
-# Policy Engine Architecture
+# Architecture
 
-## System Design
+## Overview
 
-Rule-based policy evaluation and governance framework for automated decision making.
+This component is part of the Helix Collective ecosystem.
 
-## Core Components
+## Components
 
-### 1. Policy Engine
-- Rule evaluation
-- Decision making
-- Policy management
+- Core logic
+- Integration points
+- Data structures
 
-### 2. Governance Framework
-- Policy versioning
-- Access control
-- Compliance tracking
+## Design Patterns
 
-### 3. Audit System
-- Decision logging
-- Policy changes
-- Compliance reports
+- Modular architecture
+- Clean separation of concerns
+- Extensible interfaces
 
 ## Performance
 
-- Policy evaluation: < 5ms
-- Decision latency: < 10ms
-- Scalability: 10,000+ policies
-
----
-
-**Version:** 1.0
+- Optimized for production use
+- Scalable design
+- Resource efficient

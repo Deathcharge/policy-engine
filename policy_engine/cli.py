@@ -1,4 +1,4 @@
-"""Command-line interface for Helix Policy Engine."""
+"""Command-line interface for Samsarix Policy Engine."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class _ArgumentParser(argparse.ArgumentParser):
 
 def _parser() -> argparse.ArgumentParser:
     parser = _ArgumentParser(
-        prog="helix-policy",
+        prog="samsarix-policy",
         description=(
             "Evaluate local JSON action policies with deterministic deny-overrides-allow semantics."
         ),

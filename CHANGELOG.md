@@ -8,12 +8,19 @@ until the owner publishes a release.
 ### Added
 
 - Dependency-free Python policy evaluation API.
-- `helix-policy validate` and `helix-policy check` commands with stable exit codes.
+- `samsarix-policy validate` and `samsarix-policy check` commands with stable exit codes.
 - Strict, bounded JSON loading and schema-versioned policy validation.
 - Default-deny and deny-overrides-allow rule resolution.
 - Explainable decisions without echoing private context values.
 - Immutable validated policy values that cannot be changed through caller-owned lists.
-- Examples, JSON Schema, tests, CI, and release documentation.
+- Policy, request, and decision JSON Schemas with validated examples.
+- Examples, tests, pinned CI, dependency maintenance, candidate-artifact automation, structured
+  repository intake, and release documentation.
+
+### Changed
+
+- Product identity, distribution metadata, CLI, licensing contacts, and support guidance now use
+  Samsarix Policy Engine and Samsarix LLC before the first public release.
 
 ### Removed
 

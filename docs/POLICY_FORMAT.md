@@ -1,6 +1,6 @@
 # Policy format version 1
 
-Helix Policy Engine evaluates one JSON policy against requests shaped as principal, action,
+Samsarix Policy Engine evaluates one JSON policy against requests shaped as principal, action,
 resource, and context. Version 1 intentionally favors a small, auditable grammar over an embedded
 programming language.
 
@@ -110,6 +110,8 @@ Policies are limited to 1 MiB and requests to 256 KiB. Parsed JSON is limited to
 10,000 values, finite numbers, bounded strings, 512 rules, and 64 scope patterns per field.
 Duplicate JSON keys are rejected.
 
-The bundled [JSON Schema](../policy_engine/schemas/policy.schema.json) follows JSON Schema Draft
-2020-12 and mirrors the structural contract. Runtime validation remains authoritative because it
+The bundled [policy](../policy_engine/schemas/policy.schema.json),
+[request](../policy_engine/schemas/request.schema.json), and
+[decision](../policy_engine/schemas/decision.schema.json) schemas follow JSON Schema Draft 2020-12
+and mirror the public structural contracts. Runtime validation remains authoritative because it
 also enforces unique rule IDs, byte limits, duplicate-key rejection, and resource bounds.

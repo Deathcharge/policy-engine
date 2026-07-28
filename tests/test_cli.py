@@ -84,7 +84,7 @@ def test_version(capsys) -> None:
     with pytest.raises(SystemExit) as raised:
         main(["--version"])
     assert raised.value.code == 0
-    assert "helix-policy 0.1.0" in capsys.readouterr().out
+    assert "samsarix-policy 0.1.0" in capsys.readouterr().out
 
 
 def test_invalid_command_is_structured_json(capsys) -> None:

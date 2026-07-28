@@ -1,6 +1,6 @@
-# Helix Policy Engine
+# Samsarix Policy Engine
 
-Helix Policy Engine is a small, local-first Python library and CLI for deciding whether an
+Samsarix Policy Engine is a small, local-first Python library and CLI for deciding whether an
 agent or automation may perform an action on a resource. It evaluates structured JSON locally,
 returns an explainable allow/deny decision, and has no runtime dependencies, network calls,
 accounts, secrets, or LLM costs.
@@ -40,15 +40,15 @@ Install the local package and run the included decision:
 
 ```bash
 python -m pip install -e .
-helix-policy validate examples/policy.json
-helix-policy check --policy examples/policy.json --request examples/request.allowed.json --pretty
+samsarix-policy validate examples/policy.json
+samsarix-policy check --policy examples/policy.json --request examples/request.allowed.json --pretty
 ```
 
 The allowed example exits `0` and prints a JSON decision. The denied example prints a denial and
 exits `3`:
 
 ```bash
-helix-policy check --policy examples/policy.json --request examples/request.denied.json --explain
+samsarix-policy check --policy examples/policy.json --request examples/request.denied.json --explain
 ```
 
 Invalid policy, request, or command input exits `2` and writes structured JSON to stderr. This
@@ -90,7 +90,9 @@ explicitly selects a different default.
 Only `*` is special in principal, action, and resource patterns. It matches zero or more
 characters; regex metacharacters have no special meaning. Conditions are ANDed and use dotted
 paths under the request's `context` object. See [Policy format](docs/POLICY_FORMAT.md) for the full
-contract and [the bundled JSON Schema](policy_engine/schemas/policy.schema.json) for editor support.
+contract and the bundled [policy](policy_engine/schemas/policy.schema.json),
+[request](policy_engine/schemas/request.schema.json), and
+[decision](policy_engine/schemas/decision.schema.json) schemas for editor and integration support.
 
 ## Python API
 
@@ -121,10 +123,10 @@ which fields did not match. It does not echo context values into the trace.
 ## CLI reference
 
 ```text
-helix-policy --help
-helix-policy --version
-helix-policy validate POLICY [--pretty]
-helix-policy check --policy POLICY --request REQUEST|-
+samsarix-policy --help
+samsarix-policy --version
+samsarix-policy validate POLICY [--pretty]
+samsarix-policy check --policy POLICY --request REQUEST|-
                    [--explain] [--pretty]
 ```
 
@@ -186,11 +188,16 @@ See [SECURITY.md](SECURITY.md) for the trust boundary and responsible-reporting 
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the verified workflow and
 [docs/PRODUCTIZATION.md](docs/PRODUCTIZATION.md) for the assessment, acceptance criteria, remaining
-work, and release disposition. Version history is recorded in [CHANGELOG.md](CHANGELOG.md).
+work, and release disposition. Maintainers should follow the
+[release runbook](docs/RELEASING.md). Version history is recorded in [CHANGELOG.md](CHANGELOG.md).
+
+For product support, use the [Samsarix Help Center](https://www.samsarix.com/help) or email
+[support@samsarix.com](mailto:support@samsarix.com). Report vulnerabilities through the private
+channel in [SECURITY.md](SECURITY.md), not a public issue.
 
 ## License
 
-The repository contains a customized Business Source License 1.1 with a change date of June 16,
-2027 and Apache License 2.0 as its change license. The license file currently names “Helix Licensing
-System” rather than this product; only the owner or legal counsel should correct those parameters.
-Review [LICENSE](LICENSE) before use, especially the production-use threshold and commercial terms.
+Copyright is held by Samsarix LLC. The repository contains a customized Business Source License
+1.1 with a change date of June 16, 2027 and Apache License 2.0 as its change license. Review
+[LICENSE](LICENSE) before use, especially the production-use threshold and commercial terms.
+Commercial questions may be sent to [contact@samsarix.com](mailto:contact@samsarix.com).

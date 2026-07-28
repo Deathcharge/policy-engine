@@ -1,17 +1,18 @@
 [build-system]
-requires = ["setuptools>=83,<84", "wheel"]
+requires = ["setuptools>=83,<84", "wheel>=0.45,<1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "helix-policy-engine"
+name = "samsarix-policy-engine"
 version = "0.1.0"
 description = "Deterministic, local-first policy decisions for agent and automation actions"
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
 license = "BUSL-1.1"
 license-files = ["LICENSE"]
-authors = [{ name = "Helix Collective" }]
-keywords = ["authorization", "policy", "agents", "automation", "guardrails"]
+authors = [{ name = "Samsarix LLC", email = "contact@samsarix.com" }]
+maintainers = [{ name = "Samsarix Support", email = "support@samsarix.com" }]
+keywords = ["samsarix", "authorization", "policy", "agents", "automation", "guardrails"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -27,6 +28,7 @@ dependencies = []
 [project.optional-dependencies]
 dev = [
     "build>=1.2,<2",
+    "jsonschema>=4.23,<5",
     "mypy>=1.15,<2",
     "pip-audit>=2.7,<3",
     "pytest>=8,<10",
@@ -34,15 +36,20 @@ dev = [
     "ruff>=0.11,<1",
     "setuptools>=83,<84",
     "twine>=6,<7",
+    "wheel>=0.45,<1",
 ]
 
 [project.scripts]
-helix-policy = "policy_engine.cli:main"
+samsarix-policy = "policy_engine.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Deathcharge/policy-engine"
+Homepage = "https://www.samsarix.com"
 Repository = "https://github.com/Deathcharge/policy-engine.git"
 Issues = "https://github.com/Deathcharge/policy-engine/issues"
+Documentation = "https://github.com/Deathcharge/policy-engine/tree/main/docs"
+Changelog = "https://github.com/Deathcharge/policy-engine/blob/main/CHANGELOG.md"
+Support = "https://www.samsarix.com/help"
+"Commercial licensing" = "https://www.samsarix.com/pricing"
 
 [tool.setuptools]
 packages = ["policy_engine", "policy_engine.schemas"]

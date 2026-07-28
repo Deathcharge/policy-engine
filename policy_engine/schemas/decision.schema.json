@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Deathcharge/policy-engine/raw/main/policy_engine/schemas/decision.schema.json",
+  "title": "Samsarix Policy Engine decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "allowed",
+    "effect",
+    "reason",
+    "policy_id",
+    "policy_version",
+    "policy_digest",
+    "request_id",
+    "matched_rule_ids",
+    "allow_rule_ids",
+    "deny_rule_ids"
+  ],
+  "properties": {
+    "allowed": {"type": "boolean"},
+    "effect": {"enum": ["allow", "deny"]},
+    "reason": {
+      "enum": ["explicit_allow", "explicit_deny", "default_allow", "default_deny"]
+    },
+    "policy_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "policy_version": {"const": 1},
+    "policy_digest": {"type": "string", "pattern": "^[a-f0-9]{32}$"},
+    "request_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        {"type": "null"}
+      ]
+    },
+    "matched_rule_ids": {"$ref": "#/$defs/rule_ids"},
+    "allow_rule_ids": {"$ref": "#/$defs/rule_ids"},
+    "deny_rule_ids": {"$ref": "#/$defs/rule_ids"},
+    "evaluations": {
+      "type": "array",
+      "maxItems": 512,
+      "items": {"$ref": "#/$defs/evaluation"}
+    }
+  },
+  "$defs": {
+    "rule_ids": {
+      "type": "array",
+      "maxItems": 512,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "matched", "mismatches"],
+      "properties": {
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "matched": {"type": "boolean"},
+        "mismatches": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "anyOf": [
+              {"enum": ["principal", "action", "resource"]},
+              {"type": "string", "pattern": "^context\\."}
+            ]
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"allowed": {"const": true}}},
+      "then": {
+        "properties": {
+          "effect": {"const": "allow"},
+          "reason": {"enum": ["explicit_allow", "default_allow"]}
+        }
+      },
+      "else": {
+        "properties": {
+          "effect": {"const": "deny"},
+          "reason": {"enum": ["explicit_deny", "default_deny"]}
+        }
+      }
+    }
+  ]
+}

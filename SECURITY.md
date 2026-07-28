@@ -7,13 +7,15 @@ No public release has been made. Security fixes currently target the default bra
 
 ## Reporting a vulnerability
 
-Prefer GitHub's private vulnerability-reporting feature for this repository. If it is unavailable,
-open a minimal issue asking the maintainer for a private reporting channel; do not publish exploit
-details, credentials, private policy content, or personal data in a public issue.
+Email [support@samsarix.com](mailto:support@samsarix.com) with the subject
+`Security: Samsarix Policy Engine`. Include affected versions, impact, reproduction steps, and any
+suggested remediation. Do not publish exploit details, credentials, private policy content, or
+personal data in a public issue. Samsarix LLC does not currently promise a fixed response SLA, but
+will acknowledge actionable reports through the same private channel.
 
 ## Trust boundary
 
-Helix Policy Engine accepts untrusted JSON policy and request documents and returns a decision. It
+Samsarix Policy Engine accepts untrusted JSON policy and request documents and returns a decision. It
 does not authenticate principals, authorize access to the policy file itself, sign policies,
 perform the requested action, or guarantee that its caller enforces the result. The embedding
 application owns those controls.

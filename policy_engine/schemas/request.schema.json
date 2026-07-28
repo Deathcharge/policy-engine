@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Deathcharge/policy-engine/raw/main/policy_engine/schemas/request.schema.json",
+  "title": "Samsarix Policy Engine request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["principal", "action", "resource"],
+  "properties": {
+    "request_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        {"type": "null"}
+      ]
+    },
+    "principal": {"type": "string", "minLength": 1, "maxLength": 512},
+    "action": {"type": "string", "minLength": 1, "maxLength": 512},
+    "resource": {"type": "string", "minLength": 1, "maxLength": 512},
+    "context": {"type": "object", "default": {}}
+  }
+}

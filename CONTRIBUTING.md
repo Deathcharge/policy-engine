@@ -1,6 +1,6 @@
 # Contributing
 
-Helix Policy Engine is an alpha project. Small, reviewable changes that preserve deterministic,
+Samsarix Policy Engine is an alpha project. Small, reviewable changes that preserve deterministic,
 bounded, local evaluation are welcome.
 
 ## Setup

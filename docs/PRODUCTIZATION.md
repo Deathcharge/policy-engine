@@ -25,7 +25,7 @@ The historical extraction is recoverable from Git and is not part of the selecte
 
 ## Product definition
 
-**Helix Policy Engine** is a dependency-free Python library and CLI for local, deterministic action
+**Samsarix Policy Engine** is a dependency-free Python library and CLI for local, deterministic action
 guardrails. A developer loads a JSON policy, submits a principal/action/resource/context request,
 and receives an explainable decision before their application performs the action.
 
@@ -35,9 +35,9 @@ service who needs a small embedded decision point without deploying a policy ser
 Primary use case: validate a policy and gate one potentially sensitive agent action with a stable
 decision contract and shell exit code.
 
-Independent reason to exist: it provides a narrow embedded option for Helix-adjacent or unrelated
-Python tools. It has no dependency on `helix-unified`, private services, LLM providers, credentials,
-or cloud infrastructure.
+Independent reason to exist: it provides a narrow embedded option for Samsarix and unrelated
+Python tools. It has no dependency on the historical `helix-unified` codebase, private services,
+LLM providers, credentials, or cloud infrastructure.
 
 ## Product and architecture decisions
 
@@ -49,7 +49,8 @@ or cloud infrastructure.
 - Conditions use a fixed operator allowlist and typed comparisons without coercion.
 - Decisions contain identifiers and mismatch field names, not request context values.
 - Runtime dependencies are zero. Distribution is a wheel/sdist built from `pyproject.toml`.
-- The package is named `helix-policy-engine`, module `policy_engine`, and CLI `helix-policy`.
+- The package is named `samsarix-policy-engine`, module `policy_engine`, and CLI
+  `samsarix-policy`.
 - Schema version 1 is explicit; unknown versions and unknown fields fail validation.
 - The obsolete `helix_core` extraction is removed from the product tree rather than supported as an
   accidental public API.
@@ -68,6 +69,8 @@ remaining intentionally smaller than a general authorization language.
   The local verification environment is Python 3.11.9.
 - The owner wants the existing license preserved, not replaced. Metadata may identify its SPDX
   family, but legal parameters remain owner-controlled.
+- Samsarix LLC is the licensor and copyright holder; `contact@samsarix.com` is the commercial
+  contact and `support@samsarix.com` is the private support/security contact.
 - Public package publication and production deployment are not authorized.
 
 ## Baseline command results
@@ -107,8 +110,9 @@ planned checks as passed.
 - [x] Add stable CLI output and distinct denied/invalid exit codes.
 - [x] Add unit, command, packaging, and primary-journey coverage.
 - [x] Add CI, build metadata, changelog, security guidance, and accurate contribution steps.
-- [ ] Owner/legal review of the customized license parameters and product name.
-- [ ] Confirm the intended public distribution name before package publication.
+- [x] Update the product identity, licensor, copyright holder, and working contact channels.
+- [ ] Owner/legal review of the remaining customized license parameters.
+- [x] Select `samsarix-policy-engine` as the intended public distribution name.
 
 ### P2
 
@@ -128,8 +132,10 @@ planned checks as passed.
 - [x] `validate` and `check` CLI commands.
 - [x] Runnable allow and deny examples.
 - [x] Public API documentation and policy-format reference.
+- [x] Draft 2020-12 policy, request, and decision schemas with example validation.
 - [x] Test suite and CI workflow.
 - [x] Build and package configuration.
+- [x] Pinned CI actions, dependency updates, candidate-artifact workflow, and release runbook.
 - [x] Final verification and adversarial review.
 
 ## Release acceptance criteria
@@ -153,20 +159,28 @@ planned checks as passed.
 - Removed the broken agent-runtime extraction from the shipped product surface.
 - Froze validated policy values so caller-owned input cannot mutate a live engine.
 - Added bounded-input and malformed-input defenses, dependency auditing, and package smoke tests.
+- Rebranded the pre-release product and command surface for Samsarix LLC.
+- Added structured repository intake, maintenance automation, and a non-publishing release workflow.
 
 ## Deferred or blocked work
 
-- **Owner/legal:** Confirm `Licensor`, `Licensed Work`, initial/change dates, production-use threshold,
-  pricing URL, contact address, and whether BUSL-1.1 is the intended public license. Current LICENSE
-  names “Helix Licensing System,” not Helix Policy Engine.
-- **Owner/release:** Confirm `helix-policy-engine` as the PyPI name, reserve it, configure trusted
-  publishing, and publish only after license review. Verify installation from the public artifact.
+- **Owner/legal:** Confirm the June 16, 2027 change date, 1,000-call production-use threshold,
+  California governing-law language, pricing terms, and whether this customized BUSL-1.1 remains
+  the intended public license. Company, work, copyright, pricing-site, and contact identity now use
+  Samsarix LLC.
+- **Owner/release:** Reserve `samsarix-policy-engine` on PyPI, configure trusted publishing, and
+  publish only after license review. Verify installation from the public artifact. The exact PyPI
+  project endpoint returned 404 during the 2026-07-28 availability check, but that is not a
+  reservation or guarantee.
 - **Owner/portfolio:** Decide whether the old `helix_core` extraction should live in a separate
   archival repository. Git history is sufficient for this release candidate.
-- **Owner/security:** Run an independent security review before a production rollout. The Codex
-  Security setup session remained pending after **Start scan** was clicked, so it produced no scan
-  artifacts; the repository received a manual whole-tree security review and adversarial search
-  instead.
+- **Owner/brand:** Choose or create the canonical Samsarix-owned GitHub repository. The working
+  origin remains `Deathcharge/policy-engine`, while the Samsarix website's GitHub footer pointed to
+  the obsolete `helix-collective/helix-unified` URL and returned 404 on 2026-07-28. Repository and
+  schema URLs deliberately retain the working origin until a real replacement exists.
+- **Owner/security:** Run an independent security review before a production rollout. The automated
+  scanner is intentionally skipped per owner direction; the repository receives direct manual
+  review, adversarial tests, dependency auditing, and bounded-input verification instead.
 
 ## Known risks
 
@@ -194,17 +208,17 @@ Run locally on Windows with Python 3.11.9 on 2026-07-28:
 
 | Check | Actual outcome |
 | --- | --- |
-| `python -m ruff format --check .` | Passed; all 20 Python files formatted. |
+| `python -m ruff format --check .` | Passed; every discovered file was already formatted. |
 | `python -m ruff check .` | Passed with no findings. |
 | `python -m mypy policy_engine` | Passed in strict mode across 9 source files. |
-| `python -m pytest --cov=policy_engine --cov-report=term-missing` | 74 passed; 90.30% branch-aware coverage; 90% gate passed. |
+| `python -m pytest --cov=policy_engine --cov-report=term-missing` | 77 passed; 90.62% branch-aware coverage; 90% gate passed. |
 | `python -m compileall -q policy_engine tests` | Passed with no syntax errors. |
-| fresh temporary venv plus `python -m pip install --no-deps -e .` | Editable build, install, isolated import, and CLI version check passed. |
+| remove predecessor metadata, then `python -m pip install -e ".[dev]"` | Branded editable metadata build and development install passed. |
 | `python -m build` and `python -m twine check dist/*` | Built wheel and sdist; both metadata checks passed. |
-| isolated wheel install outside the repository | Version, import, schema resource, validation, allow (`0`), deny (`3`), and invalid-command (`2`) checks passed. |
+| isolated Samsarix wheel install outside the repository | Version, import, all schema resources, validation, allow (`0`), deny (`3`), and invalid-command (`2`) checks passed; no legacy CLI was installed. |
 | `python -m pip_audit --local --progress-spinner off` | No known vulnerabilities; the unpublished local project was explicitly skipped because it is absent from PyPI. |
 | `git diff --check` plus adversarial marker/dynamic-execution searches | Passed; matches were limited to provenance documentation and the inert exception-class body. |
 
 The engineering disposition is **release candidate**, not public-release approval. Public
-publication remains blocked on the named owner/legal license and distribution-name decisions, and
+publication remains blocked on the named owner/legal license decisions and PyPI setup, and
 production use remains gated on independent security review and representative user validation.

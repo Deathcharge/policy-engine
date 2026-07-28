@@ -209,6 +209,15 @@ def parse_policy(data: Mapping[str, Any]) -> Policy:
     issues.extend(_validate_json_value(document, label="policy"))
     issues.extend(_unknown_keys(document, _POLICY_KEYS, "policy"))
 
+    schema_uri = document.get("$schema")
+    if "$schema" in document and (
+        not isinstance(schema_uri, str)
+        or not schema_uri
+        or len(schema_uri) > MAX_STRING_LENGTH
+        or any(ord(character) < 32 for character in schema_uri)
+    ):
+        issues.append("policy.$schema must be a non-empty string without control characters")
+
     schema_version = document.get("schema_version")
     if schema_version != 1 or isinstance(schema_version, bool):
         issues.append("policy.schema_version must be the integer 1")

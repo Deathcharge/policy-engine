@@ -32,6 +32,7 @@ def test_policy_defaults_to_deny_and_all_principals() -> None:
     ("mutation", "message"),
     [
         (lambda value: value.update(schema_version=2), "schema_version"),
+        (lambda value: value.update({"$schema": 1}), r"policy\.\$schema"),
         (lambda value: value.update(unknown=True), "unknown field"),
         (lambda value: value.update(id="bad id"), "must match"),
         (lambda value: value.update(default="maybe"), "default"),

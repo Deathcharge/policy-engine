@@ -1,4 +1,4 @@
-"""Public exceptions raised by Helix Policy Engine."""
+"""Public exceptions raised by Samsarix Policy Engine."""
 
 from __future__ import annotations
 

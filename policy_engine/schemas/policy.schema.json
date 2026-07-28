@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/Deathcharge/policy-engine/raw/main/policy_engine/schemas/policy.schema.json",
-  "title": "Helix Policy Engine policy",
+  "title": "Samsarix Policy Engine policy",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "id", "rules"],

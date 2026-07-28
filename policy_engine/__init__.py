@@ -1,4 +1,4 @@
-"""Helix Policy Engine public API."""
+"""Samsarix Policy Engine public API."""
 
 from .engine import PolicyEngine, decide, wildcard_match
 from .errors import (

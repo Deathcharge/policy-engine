@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.12" }
+          - { os: ubuntu-latest, python: "3.13" }
+          - { os: ubuntu-latest, python: "3.14" }
+          - { os: windows-latest, python: "3.11" }
+          - { os: windows-latest, python: "3.14" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pytest --cov=policy_engine --cov-report=term-missing
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m ruff format --check .
+      - run: python -m ruff check .
+      - run: python -m mypy policy_engine
+      - run: python -m pip_audit --local --progress-spinner off
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Smoke-test built wheel
+        shell: bash
+        run: |
+          python -m venv /tmp/helix-policy-wheel
+          /tmp/helix-policy-wheel/bin/python -m pip install --no-deps dist/*.whl
+          /tmp/helix-policy-wheel/bin/helix-policy --version
+          cd /tmp
+          /tmp/helix-policy-wheel/bin/python -c "from importlib.resources import files; import policy_engine; assert files('policy_engine').joinpath('schemas', 'policy.schema.json').is_file()"

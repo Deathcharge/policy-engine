@@ -1,93 +1,196 @@
-# policy-engine
+# Helix Policy Engine
 
-Policy management and enforcement system
+Helix Policy Engine is a small, local-first Python library and CLI for deciding whether an
+agent or automation may perform an action on a resource. It evaluates structured JSON locally,
+returns an explainable allow/deny decision, and has no runtime dependencies, network calls,
+accounts, secrets, or LLM costs.
 
-## 🎯 Overview
+The project is an **alpha release candidate**. The core policy journey is implemented and tested;
+the package has not been published to PyPI, and the existing license parameters need owner review
+before a public release.
 
-This repository is part of the [Helix Collective](https://github.com/Deathcharge/helix-platform), a comprehensive ecosystem for building intelligent, multi-agent systems with consciousness frameworks and advanced LLM integration.
+## Who it is for
 
-## 🚀 Quick Start
+It is for Python developers building local agents, CI automation, developer tools, or internal
+services that need a lightweight guardrail at an action boundary. It is deliberately narrower than
+a general-purpose policy platform such as OPA or Cedar: one process loads one bounded JSON policy
+and makes deterministic decisions without another service or policy language runtime.
 
-### Installation
+## Quick start
 
-\`\`\`bash
+Prerequisite: Python 3.11, 3.12, 3.13, or 3.14.
+
+```bash
 git clone https://github.com/Deathcharge/policy-engine.git
 cd policy-engine
-pip install -r requirements.txt
-\`\`\`
+python -m venv .venv
+```
 
-### Basic Usage
+Activate the environment:
 
-See the [examples/](examples/) directory for working examples and integration patterns.
+```bash
+# macOS/Linux
+source .venv/bin/activate
 
-## 📚 Documentation
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
 
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and components
-- **[API Reference](docs/API.md)** - Complete API documentation
-- **[Integration Guide](docs/INTEGRATION.md)** - How to integrate with other Helix repos
-- **[Deployment](docs/DEPLOYMENT.md)** - Production deployment guide
-- **[Contributing](CONTRIBUTING.md)** - How to contribute
+Install the local package and run the included decision:
 
-## 🔗 Related Repositories
+```bash
+python -m pip install -e .
+helix-policy validate examples/policy.json
+helix-policy check --policy examples/policy.json --request examples/request.allowed.json --pretty
+```
 
-- **[helix-platform](https://github.com/Deathcharge/helix-platform)** - Central hub and integration guide
-- **[helix-unified](https://github.com/Deathcharge/helix-unified)** - Main unified codebase
-- **[helix-core](https://github.com/Deathcharge/helix-core)** - Core utilities and LLM integration
+The allowed example exits `0` and prints a JSON decision. The denied example prints a denial and
+exits `3`:
 
-See [HELIX_REPOSITORY_INDEX.md](https://github.com/Deathcharge/helix-platform/blob/main/HELIX_REPOSITORY_INDEX.md) for the complete ecosystem map.
+```bash
+helix-policy check --policy examples/policy.json --request examples/request.denied.json --explain
+```
 
-## 🧪 Testing
+Invalid policy, request, or command input exits `2` and writes structured JSON to stderr. This
+makes the CLI predictable in shell scripts without conflating a policy denial with an execution
+failure.
 
-Run tests with pytest:
+## Policy example
 
-\`\`\`bash
-pytest tests/ -v --cov=src
-\`\`\`
+Policies use deny-overrides-allow semantics. No matching rule means `deny` unless the policy
+explicitly selects a different default.
 
-## 🔄 CI/CD
+```json
+{
+  "schema_version": 1,
+  "id": "agent-files",
+  "default": "deny",
+  "rules": [
+    {
+      "id": "allow-approved-scratch-write",
+      "effect": "allow",
+      "principals": ["agent:*"],
+      "actions": ["file.write"],
+      "resources": ["workspace/scratch/*"],
+      "when": {
+        "approved": {"equals": true},
+        "environment": {"equals": "development"}
+      }
+    },
+    {
+      "id": "deny-secrets",
+      "effect": "deny",
+      "actions": ["file.*"],
+      "resources": ["*.env", "secrets/*", "*/secrets/*"]
+    }
+  ]
+}
+```
 
-This repository uses GitHub Actions for:
-- ✅ Automated testing (Python 3.9, 3.10, 3.11)
-- ✅ Code linting (flake8)
-- ✅ Type checking (mypy)
-- ✅ Security scanning (bandit, safety)
-- ✅ Coverage reporting (Codecov)
+Only `*` is special in principal, action, and resource patterns. It matches zero or more
+characters; regex metacharacters have no special meaning. Conditions are ANDed and use dotted
+paths under the request's `context` object. See [Policy format](docs/POLICY_FORMAT.md) for the full
+contract and [the bundled JSON Schema](policy_engine/schemas/policy.schema.json) for editor support.
 
-See [.github/workflows/ci.yml](.github/workflows/ci.yml) for details.
+## Python API
 
-## 📋 Requirements
+```python
+from policy_engine import PolicyEngine, load_policy
 
-- Python 3.9+
-- Dependencies listed in requirements.txt
-- Development dependencies in requirements-dev.txt
+engine = PolicyEngine(load_policy("examples/policy.json"))
+decision = engine.evaluate(
+    {
+        "principal": "agent:docs",
+        "action": "file.read",
+        "resource": "workspace/public/README.md",
+        "context": {"environment": "development"},
+    },
+    explain=True,
+)
 
-## 🤝 Contributing
+if decision.allowed:
+    perform_action()
+else:
+    raise PermissionError(decision.reason)
+```
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Development setup
-- Code style guide
-- Testing requirements
-- Pull request process
+Policy evaluation is side-effect free. The returned `Decision` contains the policy ID and digest,
+an optional caller-provided request ID, matching rule IDs, and (when requested) a trace of
+which fields did not match. It does not echo context values into the trace.
 
-## 📄 License
+## CLI reference
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```text
+helix-policy --help
+helix-policy --version
+helix-policy validate POLICY [--pretty]
+helix-policy check --policy POLICY --request REQUEST|-
+                   [--explain] [--pretty]
+```
 
-## 🆘 Support
+Use `--request -` to read a request from stdin. Policy files are limited to 1 MiB, request files
+to 256 KiB, policies to 512 rules, and JSON nesting and value counts are bounded. Unknown fields,
+duplicate JSON keys, non-finite numbers, and unsupported operators are rejected before evaluation.
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/Deathcharge/policy-engine/issues)
-- **Discussions**: Ask questions in [GitHub Discussions](https://github.com/Deathcharge/policy-engine/discussions)
-- **Documentation**: See the [docs/](docs/) directory
-- **Ecosystem**: Visit [helix-platform](https://github.com/Deathcharge/helix-platform)
+## Development and verification
 
-## 🎓 Learn More
+```bash
+python -m pip install -r requirements-dev.txt
+python -m ruff format --check .
+python -m ruff check .
+python -m mypy policy_engine
+python -m pytest --cov=policy_engine --cov-report=term-missing
+python -m build
+python -m twine check dist/*
+```
 
-- [Helix Collective Repository Index](https://github.com/Deathcharge/helix-platform/blob/main/HELIX_REPOSITORY_INDEX.md)
-- [Architecture Guide](https://github.com/Deathcharge/helix-platform/blob/main/docs/ARCHITECTURE.md)
-- [Integration Examples](https://github.com/Deathcharge/helix-platform/tree/main/examples)
+CI runs the same meaningful checks across supported Python versions. A wheel-install smoke test is
+also part of release verification. The runtime intentionally has no third-party dependencies, so
+there is no application dependency lockfile; development tools are constrained in the `dev` extra.
 
----
+## Architecture
 
-**Status**: ✅ Production Ready  
-**Last Updated**: June 19, 2026  
-**Maintainer**: Helix Collective Contributors
+The enforcement point creates a request and calls `PolicyEngine.evaluate`. Strict loading and
+validation happen before the immutable policy reaches the evaluator. Rule scope and conditions are
+evaluated without `eval`, regex, plugins, I/O, or network access. Matching deny rules override
+matching allow rules, then the configured default supplies the result when nothing matches.
+
+The historical `helix_core` extraction that previously occupied this repository was not packaged,
+depended on private `apps.backend` modules, and did not implement policy management. It is excluded
+from this product; Git history retains it at commit `da2029a` for provenance.
+
+## Security, privacy, reliability, and cost
+
+- Treat the engine as a decision point, not an enforcement mechanism: the caller must check the
+  decision before performing the action.
+- Policies and requests are untrusted input and are validated with bounded resource use.
+- Default-deny is the secure default, and explicit deny overrides allow.
+- The engine stores nothing, transmits nothing, and logs no request or context values.
+- Policy digests identify content but are not signatures; authenticate policy distribution in the
+  embedding system when tamper resistance matters.
+- Evaluation has no external API or operating cost beyond local CPU and memory.
+
+See [SECURITY.md](SECURITY.md) for the trust boundary and responsible-reporting guidance.
+
+## Limitations and deliberate non-goals
+
+- Version 1 is an action guardrail, not an identity provider, authentication system, hosted policy
+  service, policy editor, database, or complete RBAC/ABAC platform.
+- Conditions do not execute code, call external data sources, traverse arrays by path, or support
+  regex. These constraints keep evaluation reviewable and bounded.
+- Policies are loaded explicitly. Hot reload, signing, remote bundles, and decision-log sinks remain
+  embedding concerns.
+- `default: "allow"` exists for migration scenarios but should be chosen deliberately.
+
+## Contributing and release status
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the verified workflow and
+[docs/PRODUCTIZATION.md](docs/PRODUCTIZATION.md) for the assessment, acceptance criteria, remaining
+work, and release disposition. Version history is recorded in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+The repository contains a customized Business Source License 1.1 with a change date of June 16,
+2027 and Apache License 2.0 as its change license. The license file currently names “Helix Licensing
+System” rather than this product; only the owner or legal counsel should correct those parameters.
+Review [LICENSE](LICENSE) before use, especially the production-use threshold and commercial terms.

@@ -1,0 +1,9 @@
+{
+  "request_id": "demo-denied-001",
+  "principal": "agent:docs",
+  "action": "file.read",
+  "resource": "workspace/private/roadmap.md",
+  "context": {
+    "environment": "development"
+  }
+}

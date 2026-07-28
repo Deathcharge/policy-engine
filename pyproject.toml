@@ -1,32 +1,77 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=83,<84", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "policy-engine"
+name = "helix-policy-engine"
 version = "0.1.0"
-description = "Ethical governance and policy management"
+description = "Deterministic, local-first policy decisions for agent and automation actions"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "MIT"}
-authors = [
-    {name = "Helix Collective", email = "collective@helix.ai"}
-]
+requires-python = ">=3.11,<3.15"
+license = "BUSL-1.1"
+license-files = ["LICENSE"]
+authors = [{ name = "Helix Collective" }]
+keywords = ["authorization", "policy", "agents", "automation", "guardrails"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
-dependencies = [
-    "helix-hub-shared>=0.1.0",
-    "pydantic>=2.0",
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2,<2",
+    "mypy>=1.15,<2",
+    "pip-audit>=2.7,<3",
+    "pytest>=8,<10",
+    "pytest-cov>=6,<8",
+    "ruff>=0.11,<1",
+    "setuptools>=83,<84",
+    "twine>=6,<7",
 ]
+
+[project.scripts]
+helix-policy = "policy_engine.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Deathcharge/policy-engine"
 Repository = "https://github.com/Deathcharge/policy-engine.git"
 Issues = "https://github.com/Deathcharge/policy-engine/issues"
+
+[tool.setuptools]
+packages = ["policy_engine", "policy_engine.schemas"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+policy_engine = ["py.typed", "schemas/*.json"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["policy_engine"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["policy_engine"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]

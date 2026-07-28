@@ -1,0 +1,9 @@
+{
+  "request_id": "demo-allowed-001",
+  "principal": "agent:docs",
+  "action": "file.read",
+  "resource": "workspace/public/README.md",
+  "context": {
+    "environment": "development"
+  }
+}

@@ -19,6 +19,14 @@ wheels/
 .installed.cfg
 *.egg
 .venv
+.venv/
+.wheel-venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 env/
 venv/
 ENV/

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from importlib.metadata import version
+from importlib.metadata import metadata, version
 from importlib.resources import files
 from pathlib import Path
 
@@ -49,3 +49,19 @@ def test_examples_conform_to_public_schemas() -> None:
 
 def test_distribution_and_api_versions_match() -> None:
     assert version("samsarix-policy-engine") == __version__
+
+    distribution = metadata("samsarix-policy-engine")
+    assert distribution["Name"] == "samsarix-policy-engine"
+    assert distribution["License-Expression"] == "BUSL-1.1"
+    assert distribution.get_all("License-File") == ["LICENSE"]
+
+
+def test_license_uses_standard_busl_parameters() -> None:
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+
+    assert "Licensor:             Samsarix LLC" in license_text
+    assert "Additional Use Grant:" in license_text
+    assert "1,000 policy\n                      evaluation requests" in license_text
+    assert "Covenants of Licensor" in license_text
+    assert "4. Not to modify this License in any other way." in license_text
+    assert "California" not in license_text

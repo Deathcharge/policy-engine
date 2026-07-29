@@ -21,6 +21,8 @@ until the owner publishes a release.
 
 - Product identity, distribution metadata, CLI, licensing contacts, and support guidance now use
   Samsarix Policy Engine and Samsarix LLC before the first public release.
+- Replaced the previously modified license body with standard BUSL-1.1 terms and expressed the
+  existing production threshold as a 1,000-policy-evaluation monthly Additional Use Grant.
 
 ### Removed
 

@@ -5,8 +5,8 @@ performed until the legal and account gates below are complete.
 
 ## 1. Owner gates
 
-- Confirm the customized license terms in `LICENSE`, including change date, governing law,
-  production-use threshold, and current pricing.
+- Confirm the BUSL-1.1 parameters in `LICENSE`, including the change date, 1,000-evaluation
+  production-use grant, and Apache-2.0 change license. Keep the standard license body unchanged.
 - Confirm that `samsarix-policy-engine` is controlled by Samsarix LLC on PyPI.
 - Configure PyPI trusted publishing for the exact GitHub repository and a protected `pypi`
   environment. Do not store a long-lived PyPI token in the repository.

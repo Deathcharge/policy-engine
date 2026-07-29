@@ -19,7 +19,7 @@ unpackaged `helix_core` agent-runtime snapshot plus mutually inconsistent packag
   were not needed by any standalone product journey;
 - no tests, examples, docs directory, workflows, package entry point, or policy API existed;
 - the README advertised all of those missing assets, claimed production readiness, and said MIT
-  while the repository license is a customized Business Source License 1.1.
+  while the repository carried a modified Business Source License 1.1 body.
 
 The historical extraction is recoverable from Git and is not part of the selected distribution.
 
@@ -67,8 +67,8 @@ remaining intentionally smaller than a general authorization language.
 - Python 3.11 is the minimum because the public model uses `StrEnum`; support is capped at the
   latest version exercised in CI (3.14) rather than being implied for untested future versions.
   The local verification environment is Python 3.11.9.
-- The owner wants the existing license preserved, not replaced. Metadata may identify its SPDX
-  family, but legal parameters remain owner-controlled.
+- The owner wants the BUSL-1.1 commercial intent preserved. The standard body is unmodified; its
+  version-specific Additional Use Grant, Change Date, and Change License remain owner-controlled.
 - Samsarix LLC is the licensor and copyright holder; `contact@samsarix.com` is the commercial
   contact and `support@samsarix.com` is the private support/security contact.
 - Public package publication and production deployment are not authorized.
@@ -161,12 +161,14 @@ planned checks as passed.
 - Added bounded-input and malformed-input defenses, dependency auditing, and package smoke tests.
 - Rebranded the pre-release product and command surface for Samsarix LLC.
 - Added structured repository intake, maintenance automation, and a non-publishing release workflow.
+- Replaced the derived license body with standard BUSL-1.1 terms and moved the existing production
+  threshold into a product-appropriate Additional Use Grant.
 
 ## Deferred or blocked work
 
-- **Owner/legal:** Confirm the June 16, 2027 change date, 1,000-call production-use threshold,
-  California governing-law language, pricing terms, and whether this customized BUSL-1.1 remains
-  the intended public license. Company, work, copyright, pricing-site, and contact identity now use
+- **Owner/legal:** Confirm the June 16, 2027 change date, 1,000-evaluation monthly production-use
+  grant, Apache-2.0 change license, and whether BUSL-1.1 remains the intended public license. The
+  standard license body is restored and company, work, copyright, and contact identity use
   Samsarix LLC.
 - **Owner/release:** Reserve `samsarix-policy-engine` on PyPI, configure trusted publishing, and
   publish only after license review. Verify installation from the public artifact. The exact PyPI
@@ -211,7 +213,7 @@ Run locally on Windows with Python 3.11.9 on 2026-07-28:
 | `python -m ruff format --check .` | Passed; every discovered file was already formatted. |
 | `python -m ruff check .` | Passed with no findings. |
 | `python -m mypy policy_engine` | Passed in strict mode across 9 source files. |
-| `python -m pytest --cov=policy_engine --cov-report=term-missing` | 77 passed; 90.62% branch-aware coverage; 90% gate passed. |
+| `python -m pytest --cov=policy_engine --cov-report=term-missing` | 78 passed; 90.62% branch-aware coverage; 90% gate passed. |
 | `python -m compileall -q policy_engine tests` | Passed with no syntax errors. |
 | remove predecessor metadata, then `python -m pip install -e ".[dev]"` | Branded editable metadata build and development install passed. |
 | `python -m build` and `python -m twine check dist/*` | Built wheel and sdist; both metadata checks passed. |

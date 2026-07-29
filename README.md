@@ -197,7 +197,11 @@ channel in [SECURITY.md](SECURITY.md), not a public issue.
 
 ## License
 
-Copyright is held by Samsarix LLC. The repository contains a customized Business Source License
-1.1 with a change date of June 16, 2027 and Apache License 2.0 as its change license. Review
-[LICENSE](LICENSE) before use, especially the production-use threshold and commercial terms.
+Copyright is held by Samsarix LLC. The repository uses Business Source License 1.1 with
+version-specific parameters, a change date of June 16, 2027, and Apache License 2.0 as its change
+license. It is source-available but is not an Open Source license before conversion. The
+Additional Use Grant permits up to 1,000 production policy evaluations per calendar month across
+all deployments under the user's control; higher-volume production use requires an alternative
+commercial license. Review
+[LICENSE](LICENSE) and the plain-language [licensing guide](docs/LICENSING.md) before use.
 Commercial questions may be sent to [contact@samsarix.com](mailto:contact@samsarix.com).

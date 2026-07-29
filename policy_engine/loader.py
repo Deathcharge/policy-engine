@@ -12,6 +12,7 @@ from .validation import parse_policy, parse_request
 
 MAX_POLICY_BYTES = 1_048_576
 MAX_REQUEST_BYTES = 262_144
+MAX_JSON_DEPTH = 64
 
 
 class _DuplicateKeyError(ValueError):
@@ -27,6 +28,35 @@ def _reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def _enforce_max_json_depth(text: str, *, source: str) -> None:
+    """Reject deeply nested containers without relying on interpreter recursion limits."""
+    depth = 0
+    in_string = False
+    escaped = False
+
+    for character in text:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == '"':
+                in_string = False
+            continue
+
+        if character == '"':
+            in_string = True
+        elif character in "[{":
+            depth += 1
+            if depth > MAX_JSON_DEPTH:
+                raise DocumentLoadError(
+                    f"{source} is not valid strict JSON: maximum nesting depth "
+                    f"{MAX_JSON_DEPTH} exceeded"
+                )
+        elif character in "]}":
+            depth -= 1
+
+
 def decode_json(payload: bytes, *, source: str, max_bytes: int) -> dict[str, Any]:
     """Decode one bounded JSON object while rejecting duplicate keys and NaN values."""
     if len(payload) > max_bytes:
@@ -35,6 +65,7 @@ def decode_json(payload: bytes, *, source: str, max_bytes: int) -> dict[str, Any
         text = payload.decode("utf-8-sig")
     except UnicodeDecodeError as exc:
         raise DocumentLoadError(f"{source} is not valid UTF-8") from exc
+    _enforce_max_json_depth(text, source=source)
     try:
         value = json.loads(
             text,

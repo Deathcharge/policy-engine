@@ -131,7 +131,8 @@ samsarix-policy check --policy POLICY --request REQUEST|-
 ```
 
 Use `--request -` to read a request from stdin. Policy files are limited to 1 MiB, request files
-to 256 KiB, policies to 512 rules, and JSON nesting and value counts are bounded. Unknown fields,
+to 256 KiB, policies to 512 rules, JSON documents to 64 nested containers, and context value
+counts are bounded. Unknown fields,
 duplicate JSON keys, non-finite numbers, and unsupported operators are rejected before evaluation.
 
 ## Development and verification

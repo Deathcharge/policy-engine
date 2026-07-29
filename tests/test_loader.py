@@ -5,7 +5,7 @@ import json
 import pytest
 
 from policy_engine import DocumentLoadError, load_policy, load_request_bytes
-from policy_engine.loader import MAX_POLICY_BYTES, decode_json
+from policy_engine.loader import MAX_JSON_DEPTH, MAX_POLICY_BYTES, decode_json
 
 
 def test_load_policy_accepts_utf8_bom(tmp_path) -> None:
@@ -54,5 +54,12 @@ def test_load_request_bytes_validates_request() -> None:
 
 def test_decode_json_turns_excessive_nesting_into_a_safe_error() -> None:
     payload = b'{"value":' + (b"[" * 2_000) + (b"]" * 2_000) + b"}"
-    with pytest.raises(DocumentLoadError, match="strict JSON"):
+    with pytest.raises(DocumentLoadError, match="maximum nesting depth"):
         decode_json(payload, source="deep", max_bytes=10_000)
+
+
+def test_decode_json_accepts_the_depth_limit_and_ignores_brackets_in_strings() -> None:
+    arrays = MAX_JSON_DEPTH - 1  # The root object consumes one nesting level.
+    payload = b'{"value":' + (b"[" * arrays) + b'"[ignored]"' + (b"]" * arrays) + b"}"
+
+    assert decode_json(payload, source="boundary", max_bytes=10_000)["value"]

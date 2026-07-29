@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Deathcharge/policy-engine/raw/main/policy_engine/schemas/policy.schema.json",
+  "title": "Samsarix Policy Engine policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "rules"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+    "description": {"type": "string", "maxLength": 16384},
+    "default": {"enum": ["allow", "deny"], "default": "deny"},
+    "rules": {
+      "type": "array",
+      "maxItems": 512,
+      "items": {"$ref": "#/$defs/rule"}
+    }
+  },
+  "$defs": {
+    "patterns": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {"type": "string", "minLength": 1, "maxLength": 512}
+    },
+    "scalar": {"type": ["string", "number", "integer", "boolean", "null"]},
+    "condition": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["equals"], "properties": {"equals": {"$ref": "#/$defs/scalar"}}},
+        {"type": "object", "additionalProperties": false, "required": ["not_equals"], "properties": {"not_equals": {"$ref": "#/$defs/scalar"}}},
+        {"type": "object", "additionalProperties": false, "required": ["in"], "properties": {"in": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/$defs/scalar"}}}},
+        {"type": "object", "additionalProperties": false, "required": ["not_in"], "properties": {"not_in": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/$defs/scalar"}}}},
+        {"type": "object", "additionalProperties": false, "required": ["contains"], "properties": {"contains": {"$ref": "#/$defs/scalar"}}},
+        {"type": "object", "additionalProperties": false, "required": ["exists"], "properties": {"exists": {"type": "boolean"}}},
+        {"type": "object", "additionalProperties": false, "required": ["lt"], "properties": {"lt": {"type": "number"}}},
+        {"type": "object", "additionalProperties": false, "required": ["lte"], "properties": {"lte": {"type": "number"}}},
+        {"type": "object", "additionalProperties": false, "required": ["gt"], "properties": {"gt": {"type": "number"}}},
+        {"type": "object", "additionalProperties": false, "required": ["gte"], "properties": {"gte": {"type": "number"}}}
+      ]
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "effect", "actions", "resources"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+        "description": {"type": "string", "maxLength": 16384},
+        "effect": {"enum": ["allow", "deny"]},
+        "principals": {"$ref": "#/$defs/patterns", "default": ["*"]},
+        "actions": {"$ref": "#/$defs/patterns"},
+        "resources": {"$ref": "#/$defs/patterns"},
+        "when": {
+          "type": "object",
+          "maxProperties": 64,
+          "propertyNames": {"pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*){0,15}$"},
+          "additionalProperties": {"$ref": "#/$defs/condition"}
+        }
+      }
+    }
+  }
+}

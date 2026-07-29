@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose a bounded addition tied to a concrete policy journey
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the action boundary or integration that is currently difficult.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Product constraints
+      options:
+        - label: This can remain deterministic and locally evaluable.
+          required: true
+        - label: This does not require executing policy-supplied code, regex, or templates.
+          required: true
+        - label: I described new resource bounds or failure behavior where applicable.
+          required: true

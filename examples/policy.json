@@ -1,0 +1,37 @@
+{
+  "$schema": "../policy_engine/schemas/policy.schema.json",
+  "schema_version": 1,
+  "id": "agent-action-guardrails",
+  "description": "Example local guardrails for an automation agent.",
+  "default": "deny",
+  "rules": [
+    {
+      "id": "allow-public-read",
+      "description": "Agents may read files in the public workspace area.",
+      "effect": "allow",
+      "principals": ["agent:*"],
+      "actions": ["file.read"],
+      "resources": ["workspace/public/*"]
+    },
+    {
+      "id": "allow-approved-development-write",
+      "description": "Development writes require an explicit approval marker.",
+      "effect": "allow",
+      "principals": ["agent:*"],
+      "actions": ["file.write"],
+      "resources": ["workspace/scratch/*"],
+      "when": {
+        "approved": {"equals": true},
+        "environment": {"equals": "development"}
+      }
+    },
+    {
+      "id": "deny-sensitive-files",
+      "description": "Sensitive configuration remains unavailable even if another rule allows it.",
+      "effect": "deny",
+      "principals": ["*"],
+      "actions": ["file.*"],
+      "resources": ["*.env", "secrets/*", "*/secrets/*"]
+    }
+  ]
+}

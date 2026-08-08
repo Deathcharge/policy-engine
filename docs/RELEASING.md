@@ -33,9 +33,11 @@ python -m build
 python -m twine check dist/*
 ```
 
-Inspect the wheel and source archive. They must contain the `policy_engine` package, all three JSON
-schemas, typing marker, license, docs, examples, and tests; they must not contain credentials,
-virtual environments, caches, build logs, or the historical `helix_core` extraction.
+Inspect the wheel and source archive separately. The wheel must contain only the importable
+`policy_engine` package, all three JSON schemas, the typing marker, and its distribution metadata
+and license file. The source archive additionally contains the maintainer documentation, examples,
+tests, and development requirements declared by `MANIFEST.in`. Neither artifact may contain
+credentials, virtual environments, caches, build logs, or the historical `helix_core` extraction.
 
 ## 3. Exercise the artifact
 
@@ -43,13 +45,14 @@ Install the wheel into a new environment from outside the repository and reprodu
 journey:
 
 ```bash
+REPOSITORY_ROOT=/absolute/path/to/policy-engine
 python -m venv wheel-smoke
-wheel-smoke/bin/python -m pip install --no-deps dist/*.whl
+wheel-smoke/bin/python -m pip install --no-deps "$REPOSITORY_ROOT"/dist/*.whl
 wheel-smoke/bin/samsarix-policy --version
-wheel-smoke/bin/samsarix-policy validate /absolute/path/to/examples/policy.json
+wheel-smoke/bin/samsarix-policy validate "$REPOSITORY_ROOT"/examples/policy.json
 wheel-smoke/bin/samsarix-policy check \
-  --policy /absolute/path/to/examples/policy.json \
-  --request /absolute/path/to/examples/request.allowed.json
+  --policy "$REPOSITORY_ROOT"/examples/policy.json \
+  --request "$REPOSITORY_ROOT"/examples/request.allowed.json
 ```
 
 Use `wheel-smoke\Scripts\` instead of `wheel-smoke/bin/` on Windows. Also verify the denied fixture

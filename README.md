@@ -200,7 +200,7 @@ channel in [SECURITY.md](SECURITY.md), not a public issue.
 
 Copyright is held by Samsarix LLC. The repository uses Business Source License 1.1 with
 version-specific parameters, a change date of June 16, 2027, and Apache License 2.0 as its change
-license. It is source-available but is not an Open Source license before conversion. The
+license. It is source-available but is not an open-source license before conversion. The
 Additional Use Grant permits up to 1,000 production policy evaluations per calendar month across
 all deployments under the user's control; higher-volume production use requires an alternative
 commercial license. Review

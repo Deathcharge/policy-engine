@@ -25,3 +25,7 @@ class PolicyValidationError(ValidationError):
 
 class RequestValidationError(ValidationError):
     """Raised when an authorization request is invalid."""
+
+
+class TestSuiteValidationError(ValidationError):
+    """Raised when a policy test-suite document is invalid."""

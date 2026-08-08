@@ -27,13 +27,18 @@ evidence. Release, publication, and flagship adoption remain separate decisions.
 
 Current hardening backlog:
 
-- No demonstrated caller actually enforces its decisions.
+- A regression-tested agent-tool example now enforces decisions before invoking callbacks. A
+  production consumer and representative-user evidence are still required for flagship adoption.
 - No signed policy distribution, hot reload, policy version service, audit sink, identity model, or multi-process cache; these are acceptable exclusions but limit the wedge.
 - Wildcard and condition semantics are deliberately small and may be insufficient for complex authorization.
 - The 1,000-evaluation monthly BSL production grant is poorly aligned with normal policy-engine volume.
 - CI and wheel/sdist behavior are verified. PyPI package-name ownership and trusted-publisher
   configuration still require owner evidence before publication.
 - The flagship already contains multiple policy implementations, leaving canonical ownership unresolved.
+
+Next competitive increments are bounded batch evaluation, versioned policy artifacts, an opt-in
+redacted audit adapter, and consumer-specific enforcement adapters. The evidence and rationale are
+recorded in `docs/COMPETITIVE_LANDSCAPE.md`.
 
 ## Samsarix adoption
 

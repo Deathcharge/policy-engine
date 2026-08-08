@@ -34,7 +34,7 @@ python -m twine check dist/*
 ```
 
 Inspect the wheel and source archive separately. The wheel must contain only the importable
-`policy_engine` package, all three JSON schemas, the typing marker, and its distribution metadata
+`policy_engine` package, all four JSON schemas, the typing marker, and its distribution metadata
 and license file. The source archive additionally contains the maintainer documentation, examples,
 tests, and development requirements declared by `MANIFEST.in`. Neither artifact may contain
 credentials, virtual environments, caches, build logs, or the historical `helix_core` extraction.

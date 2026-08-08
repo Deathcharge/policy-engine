@@ -1,0 +1,53 @@
+{
+  "$schema": "../../policy_engine/schemas/policy.schema.json",
+  "schema_version": 1,
+  "id": "agent-tool-gateway",
+  "description": "Fail-closed permissions for a research agent at tool execution boundaries.",
+  "default": "deny",
+  "rules": [
+    {
+      "id": "deny-shell-execution",
+      "description": "Research agents never invoke local shells.",
+      "effect": "deny",
+      "principals": ["agent:*"],
+      "actions": ["process.exec"],
+      "resources": ["shell:*"]
+    },
+    {
+      "id": "deny-secret-files",
+      "description": "Secret paths remain unavailable even when another file rule matches.",
+      "effect": "deny",
+      "principals": ["agent:*"],
+      "actions": ["file.*"],
+      "resources": ["*.env", "*/secrets/*", "secrets/*"]
+    },
+    {
+      "id": "allow-research-search",
+      "effect": "allow",
+      "principals": ["agent:research"],
+      "actions": ["tool.invoke"],
+      "resources": ["tool:web.search"],
+      "when": {
+        "environment": {"not_equals": "production"}
+      }
+    },
+    {
+      "id": "allow-public-workspace-read",
+      "effect": "allow",
+      "principals": ["agent:research"],
+      "actions": ["file.read"],
+      "resources": ["workspace/public/*"]
+    },
+    {
+      "id": "allow-approved-scratch-write",
+      "effect": "allow",
+      "principals": ["agent:*"],
+      "actions": ["file.write"],
+      "resources": ["workspace/scratch/*"],
+      "when": {
+        "approved": {"equals": true},
+        "environment": {"equals": "development"}
+      }
+    }
+  ]
+}

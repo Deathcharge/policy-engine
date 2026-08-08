@@ -13,7 +13,10 @@ until the owner publishes a release.
 - Default-deny and deny-overrides-allow rule resolution.
 - Explainable decisions without echoing private context values.
 - Immutable validated policy values that cannot be changed through caller-owned lists.
-- Policy, request, and decision JSON Schemas with validated examples.
+- Policy, request, decision, and policy-test JSON Schemas with validated examples.
+- Schema-validated policy test suites, a stable test report API, and `samsarix-policy test` for CI.
+- A regression-tested agent-tool enforcement example covering explicit allow, explicit deny,
+  default deny, overlapping rules, environment boundaries, and approvals.
 - Examples, tests, pinned CI, dependency maintenance, candidate-artifact automation, structured
   repository intake, and release documentation.
 
@@ -21,6 +24,8 @@ until the owner publishes a release.
 
 - Product identity, distribution metadata, CLI, licensing contacts, and support guidance now use
   Samsarix Policy Engine and Samsarix LLC before the first public release.
+- Request context is deeply detached and immutable, and explained zero-rule decisions now retain an
+  explicit empty evaluation trace.
 - Replaced the previously modified license body with standard BUSL-1.1 terms and expressed the
   existing production threshold as a 1,000-policy-evaluation monthly Additional Use Grant.
 

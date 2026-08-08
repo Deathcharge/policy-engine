@@ -33,9 +33,11 @@ python -m build
 python -m twine check dist/*
 ```
 
-Inspect the wheel and source archive. They must contain the `policy_engine` package, all three JSON
-schemas, typing marker, license, docs, examples, and tests; they must not contain credentials,
-virtual environments, caches, build logs, or the historical `helix_core` extraction.
+Inspect the wheel and source archive separately. The wheel must contain only the importable
+`policy_engine` package, all four JSON schemas, the typing marker, and its distribution metadata
+and license file. The source archive additionally contains the maintainer documentation, examples,
+tests, and development requirements declared by `MANIFEST.in`. Neither artifact may contain
+credentials, virtual environments, caches, build logs, or the historical `helix_core` extraction.
 
 ## 3. Exercise the artifact
 
@@ -43,17 +45,25 @@ Install the wheel into a new environment from outside the repository and reprodu
 journey:
 
 ```bash
+REPOSITORY_ROOT=/absolute/path/to/policy-engine
 python -m venv wheel-smoke
-wheel-smoke/bin/python -m pip install --no-deps dist/*.whl
+wheel-smoke/bin/python -m pip install --no-deps "$REPOSITORY_ROOT"/dist/*.whl
 wheel-smoke/bin/samsarix-policy --version
-wheel-smoke/bin/samsarix-policy validate /absolute/path/to/examples/policy.json
+wheel-smoke/bin/samsarix-policy validate "$REPOSITORY_ROOT"/examples/policy.json
 wheel-smoke/bin/samsarix-policy check \
-  --policy /absolute/path/to/examples/policy.json \
-  --request /absolute/path/to/examples/request.allowed.json
+  --policy "$REPOSITORY_ROOT"/examples/policy.json \
+  --request "$REPOSITORY_ROOT"/examples/request.allowed.json
+wheel-smoke/bin/samsarix-policy test \
+  --policy "$REPOSITORY_ROOT"/examples/agent-tool-gateway/policy.json \
+  --suite "$REPOSITORY_ROOT"/examples/agent-tool-gateway/policy-tests.json \
+  --pretty
+wheel-smoke/bin/python -I -c "from importlib.resources import files; assert files('policy_engine').joinpath('schemas', 'test-suite.schema.json').is_file()"
 ```
 
 Use `wheel-smoke\Scripts\` instead of `wheel-smoke/bin/` on Windows. Also verify the denied fixture
-exits `3` and invalid input exits `2`.
+exits `3` and invalid input exits `2`. The policy-suite command must exit `0` with `passed: true`,
+`total: 7`, and `failed_count: 0`; the final command verifies that the installed wheel exposes the
+test-suite schema used by editors and integrations.
 
 ## 4. Tag and stage
 

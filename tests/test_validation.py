@@ -4,7 +4,15 @@ import copy
 
 import pytest
 
-from policy_engine import PolicyValidationError, RequestValidationError, parse_policy, parse_request
+from policy_engine import (
+    Effect,
+    PolicyValidationError,
+    RequestValidationError,
+    Rule,
+    parse_policy,
+    parse_request,
+)
+from policy_engine.models import Condition, Operator
 
 
 def valid_policy() -> dict:
@@ -98,6 +106,33 @@ def test_request_control_characters_are_rejected() -> None:
         parse_request({"principal": "u" * 513, "action": "read", "resource": "x"})
 
 
+def test_request_context_is_deeply_immutable_and_detached_from_input() -> None:
+    context = {"subject": {"roles": ["reader"]}}
+    request = parse_request(
+        {"principal": "u", "action": "read", "resource": "x", "context": context}
+    )
+
+    context["subject"]["roles"].append("admin")
+
+    assert request.context["subject"]["roles"] == ("reader",)
+    with pytest.raises(TypeError):
+        request.context["subject"]["roles"] += ("admin",)
+
+
+def test_hand_built_rule_rejects_duplicate_condition_paths() -> None:
+    condition = Condition(path="risk", operator=Operator.LT, value=5)
+
+    with pytest.raises(ValueError, match="unique paths"):
+        Rule(
+            id="duplicate",
+            effect=Effect.ALLOW,
+            principals=("*",),
+            actions=("read",),
+            resources=("*",),
+            conditions=(condition, condition),
+        )
+
+
 def test_conditions_and_diagnostics_are_bounded() -> None:
     document = valid_policy()
     document["rules"][0]["when"] = {f"field{index}": {"unknown": index} for index in range(200)}
@@ -105,3 +140,19 @@ def test_conditions_and_diagnostics_are_bounded() -> None:
         parse_policy(document)
     assert len(raised.value.issues) <= 101
     assert any("exceeds 64 conditions" in issue for issue in raised.value.issues)
+
+
+def test_policy_patterns_are_not_limited_by_the_smaller_request_context_budget() -> None:
+    document = valid_policy()
+    document["rules"] = [
+        {
+            "id": f"rule-{index}",
+            "effect": "allow",
+            "principals": [f"principal-{item}" for item in range(64)],
+            "actions": [f"action-{item}" for item in range(64)],
+            "resources": [f"resource-{item}" for item in range(64)],
+        }
+        for index in range(64)
+    ]
+
+    assert len(parse_policy(document).rules) == 64

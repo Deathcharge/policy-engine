@@ -132,7 +132,7 @@ planned checks as passed.
 - [x] `validate` and `check` CLI commands.
 - [x] Runnable allow and deny examples.
 - [x] Public API documentation and policy-format reference.
-- [x] Draft 2020-12 policy, request, and decision schemas with example validation.
+- [x] Draft 2020-12 policy, request, decision, and test-suite schemas with example validation.
 - [x] Test suite and CI workflow.
 - [x] Build and package configuration.
 - [x] Pinned CI actions, dependency updates, candidate-artifact workflow, and release runbook.

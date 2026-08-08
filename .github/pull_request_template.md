@@ -1,4 +1,4 @@
-## User-facing outcome
+# User-facing outcome
 
 Describe the concrete behavior changed and why it belongs in this product.
 

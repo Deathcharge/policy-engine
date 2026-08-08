@@ -11,7 +11,7 @@ from .models import (
     Condition,
     Decision,
     Effect,
-    JsonValue,
+    JsonLike,
     Operator,
     Policy,
     Request,
@@ -62,10 +62,10 @@ def _matches_any(patterns: tuple[str, ...], value: str) -> bool:
     return any(wildcard_match(pattern, value) for pattern in patterns)
 
 
-def _context_value(context: Mapping[str, JsonValue], path: str) -> JsonValue | object:
-    current: JsonValue | object = context
+def _context_value(context: Mapping[str, JsonLike], path: str) -> JsonLike | object:
+    current: JsonLike | object = context
     for segment in path.split("."):
-        if not isinstance(current, dict) or segment not in current:
+        if not isinstance(current, Mapping) or segment not in current:
             return _MISSING
         current = current[segment]
     return current
@@ -81,7 +81,7 @@ def _json_equal(left: Any, right: Any) -> bool:
     return type(left) is type(right) and bool(left == right)
 
 
-def _condition_matches(condition: Condition, context: Mapping[str, JsonValue]) -> bool:
+def _condition_matches(condition: Condition, context: Mapping[str, JsonLike]) -> bool:
     actual = _context_value(context, condition.path)
     expected = condition.value
     operator = condition.operator
@@ -101,7 +101,9 @@ def _condition_matches(condition: Condition, context: Mapping[str, JsonValue]) -
             _json_equal(actual, item) for item in expected
         )
     if operator is Operator.CONTAINS:
-        return isinstance(actual, list) and any(_json_equal(item, expected) for item in actual)
+        return isinstance(actual, (list, tuple)) and any(
+            _json_equal(item, expected) for item in actual
+        )
     if not (_is_number(actual) and _is_number(expected)):
         return False
     if operator is Operator.LT:
@@ -208,7 +210,7 @@ class PolicyEngine:
             matched_rule_ids=tuple(rule.id for rule in matched_rules),
             allow_rule_ids=allow_ids,
             deny_rule_ids=deny_ids,
-            evaluations=evaluations if explain else (),
+            evaluations=evaluations if explain else None,
         )
 
 

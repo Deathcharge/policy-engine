@@ -1,0 +1,106 @@
+{
+  "$schema": "../../policy_engine/schemas/test-suite.schema.json",
+  "schema_version": 1,
+  "name": "Agent tool gateway contract",
+  "cases": [
+    {
+      "name": "research search is allowed outside production",
+      "request": {
+        "request_id": "search-allowed",
+        "principal": "agent:research",
+        "action": "tool.invoke",
+        "resource": "tool:web.search",
+        "context": {"environment": "development"}
+      },
+      "expect": {
+        "allowed": true,
+        "reason": "explicit_allow",
+        "matched_rule_ids": ["allow-research-search"]
+      }
+    },
+    {
+      "name": "production search is denied by default",
+      "request": {
+        "request_id": "search-production",
+        "principal": "agent:research",
+        "action": "tool.invoke",
+        "resource": "tool:web.search",
+        "context": {"environment": "production"}
+      },
+      "expect": {
+        "allowed": false,
+        "reason": "default_deny",
+        "matched_rule_ids": []
+      }
+    },
+    {
+      "name": "shell execution is explicitly denied",
+      "request": {
+        "request_id": "shell-denied",
+        "principal": "agent:research",
+        "action": "process.exec",
+        "resource": "shell:delete",
+        "context": {"environment": "development"}
+      },
+      "expect": {
+        "allowed": false,
+        "reason": "explicit_deny",
+        "matched_rule_ids": ["deny-shell-execution"]
+      }
+    },
+    {
+      "name": "public workspace files are readable",
+      "request": {
+        "principal": "agent:research",
+        "action": "file.read",
+        "resource": "workspace/public/brief.md"
+      },
+      "expect": {
+        "allowed": true,
+        "reason": "explicit_allow",
+        "matched_rule_ids": ["allow-public-workspace-read"]
+      }
+    },
+    {
+      "name": "secret files are denied even under a readable path",
+      "request": {
+        "principal": "agent:research",
+        "action": "file.read",
+        "resource": "workspace/public/secrets/token.txt"
+      },
+      "expect": {
+        "allowed": false,
+        "reason": "explicit_deny",
+        "matched_rule_ids": ["deny-secret-files", "allow-public-workspace-read"]
+      }
+    },
+    {
+      "name": "approved development scratch writes are allowed",
+      "request": {
+        "principal": "agent:research",
+        "action": "file.write",
+        "resource": "workspace/scratch/notes.md",
+        "context": {"approved": true, "environment": "development"}
+      },
+      "expect": {
+        "allowed": true,
+        "reason": "explicit_allow",
+        "matched_rule_ids": ["allow-approved-scratch-write"]
+      }
+    },
+    {
+      "name": "unapproved scratch writes are denied by default",
+      "request": {
+        "principal": "agent:research",
+        "action": "file.write",
+        "resource": "workspace/scratch/notes.md",
+        "context": {"approved": false, "environment": "development"}
+      },
+      "expect": {
+        "allowed": false,
+        "reason": "default_deny",
+        "matched_rule_ids": []
+      }
+    }
+  ]
+}

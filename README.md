@@ -100,8 +100,11 @@ paths under the request's `context` object. See [Policy format](docs/POLICY_FORM
 contract and the bundled [policy](policy_engine/schemas/policy.schema.json),
 [request](policy_engine/schemas/request.schema.json),
 [decision](policy_engine/schemas/decision.schema.json), and
-[test-suite](policy_engine/schemas/test-suite.schema.json) schemas for editor and integration
+[test-suite](policy_engine/schemas/test-suite.schema.json), and
+[batch](policy_engine/schemas/batch.schema.json) schemas for editor and integration
 support.
+
+For multi-action gateways and jobs, see [bounded batch evaluation](docs/BATCH_EVALUATION.md).
 
 ## Python API
 

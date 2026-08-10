@@ -11,6 +11,7 @@ from referencing import Registry, Resource
 from policy_engine import (
     PolicyEngine,
     __version__,
+    load_batch,
     load_policy,
     load_request,
     load_test_suite,
@@ -42,6 +43,7 @@ def test_packaged_schemas_are_present_and_valid_json() -> None:
             "request.schema.json",
             "decision.schema.json",
             "test-suite.schema.json",
+            "batch.schema.json",
         )
     }
 
@@ -78,6 +80,10 @@ def test_examples_conform_to_public_schemas() -> None:
     assert run_test_suite(
         PolicyEngine(load_policy(gateway_policy)), load_test_suite(gateway_suite)
     ).passed
+
+    batch_path = ROOT / "examples" / "request.batch.json"
+    validator("batch.schema.json").validate(json.loads(batch_path.read_text(encoding="utf-8")))
+    assert len(load_batch(batch_path).requests) == 2
 
 
 def test_distribution_and_api_versions_match() -> None:

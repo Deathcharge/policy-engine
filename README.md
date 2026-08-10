@@ -106,10 +106,6 @@ support.
 
 For multi-action gateways and jobs, see [bounded batch evaluation](docs/BATCH_EVALUATION.md).
 
-```text
-samsarix-policy batch --policy POLICY --batch BATCH [--explain] [--pretty]
-```
-
 ## Python API
 
 ```python
@@ -145,6 +141,7 @@ samsarix-policy validate POLICY [--pretty]
 samsarix-policy check --policy POLICY --request REQUEST|-
                    [--explain] [--pretty]
 samsarix-policy test --policy POLICY --suite TEST_SUITE [--pretty]
+samsarix-policy batch --policy POLICY --batch BATCH [--explain] [--pretty]
 ```
 
 Use `--request -` to read a request from stdin. Policy files are limited to 1 MiB, request files

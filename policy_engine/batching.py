@@ -25,6 +25,23 @@ class BatchRequest:
     requests: tuple[Request, ...]
     schema_version: int = 1
 
+    def __post_init__(self) -> None:
+        issues: list[str] = []
+        if self.schema_version != 1 or isinstance(self.schema_version, bool):
+            issues.append("batch.schema_version must be 1")
+        if not self.requests:
+            issues.append("batch.requests must be non-empty")
+        elif len(self.requests) > MAX_BATCH_REQUESTS:
+            issues.append(f"batch.requests exceeds {MAX_BATCH_REQUESTS} requests")
+        request_ids = [request.request_id for request in self.requests]
+        if any(request_id is None for request_id in request_ids):
+            issues.append("every batch request must have a request_id")
+        populated_ids = [request_id for request_id in request_ids if request_id is not None]
+        if len(populated_ids) != len(set(populated_ids)):
+            issues.append("batch request_id values must be unique")
+        if issues:
+            raise BatchValidationError(issues)
+
 
 @dataclass(frozen=True, slots=True)
 class BatchDecision:

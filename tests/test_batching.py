@@ -3,12 +3,14 @@ from __future__ import annotations
 import pytest
 
 from policy_engine import (
+    BatchRequest,
     BatchValidationError,
     DocumentLoadError,
     PolicyEngine,
     evaluate_batch,
     load_batch,
     parse_batch,
+    parse_request,
 )
 from policy_engine.batching import MAX_BATCH_BYTES, MAX_BATCH_REQUESTS
 
@@ -67,3 +69,11 @@ def test_batch_file_size_is_bounded(tmp_path) -> None:
     oversized.write_bytes(b" " * (MAX_BATCH_BYTES + 1))
     with pytest.raises(DocumentLoadError, match="exceeds"):
         load_batch(oversized)
+
+
+def test_direct_batch_construction_cannot_bypass_invariants() -> None:
+    parsed = parse_request(request("same"))
+    with pytest.raises(BatchValidationError, match="must be unique"):
+        BatchRequest(requests=(parsed, parsed))
+    with pytest.raises(BatchValidationError, match="must be non-empty"):
+        BatchRequest(requests=())

@@ -36,8 +36,9 @@ Current hardening backlog:
   configuration still require owner evidence before publication.
 - The flagship already contains multiple policy implementations, leaving canonical ownership unresolved.
 
-Next competitive increments are bounded batch evaluation, versioned policy artifacts, an opt-in
-redacted audit adapter, and consumer-specific enforcement adapters. The evidence and rationale are
+Bounded batch evaluation is implemented with strict correlation and resource limits. The next
+competitive increments are versioned policy artifacts, an opt-in redacted audit adapter, and
+consumer-specific enforcement adapters. The evidence and rationale are
 recorded in `docs/COMPETITIVE_LANDSCAPE.md`.
 
 ## Samsarix adoption

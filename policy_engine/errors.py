@@ -29,3 +29,7 @@ class RequestValidationError(ValidationError):
 
 class TestSuiteValidationError(ValidationError):
     """Raised when a policy test-suite document is invalid."""
+
+
+class BatchValidationError(ValidationError):
+    """Raised when a batch request document is invalid."""

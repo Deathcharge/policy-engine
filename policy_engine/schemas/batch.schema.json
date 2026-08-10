@@ -14,7 +14,7 @@
       "items": {
         "allOf": [
           {
-            "$ref": "https://github.com/Deathcharge/policy-engine/raw/main/policy_engine/schemas/request.schema.json"
+            "$ref": "request.schema.json"
           },
           {
             "required": ["request_id"],

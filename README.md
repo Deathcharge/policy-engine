@@ -106,6 +106,10 @@ support.
 
 For multi-action gateways and jobs, see [bounded batch evaluation](docs/BATCH_EVALUATION.md).
 
+```text
+samsarix-policy batch --policy POLICY --batch BATCH [--explain] [--pretty]
+```
+
 ## Python API
 
 ```python

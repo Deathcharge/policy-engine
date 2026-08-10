@@ -4,6 +4,7 @@ import json
 from importlib.metadata import metadata, version
 from importlib.resources import files
 from pathlib import Path
+from urllib.parse import urljoin
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
@@ -29,8 +30,12 @@ def load_schema(name: str) -> dict:
 def validator(name: str) -> Draft202012Validator:
     schema = load_schema(name)
     request_schema = load_schema("request.schema.json")
-    registry = Registry().with_resource(
-        request_schema["$id"], Resource.from_contents(request_schema)
+    request_resource = Resource.from_contents(request_schema)
+    registry = Registry().with_resources(
+        [
+            (request_schema["$id"], request_resource),
+            (urljoin(schema["$id"], "request.schema.json"), request_resource),
+        ]
     )
     return Draft202012Validator(schema, registry=registry)
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -26,13 +26,21 @@ class BatchRequest:
     schema_version: int = 1
 
     def __post_init__(self) -> None:
+        """Canonicalize direct construction and enforce parser-equivalent invariants."""
+        raw_requests: object = self.requests
+        if not isinstance(raw_requests, Sequence) or isinstance(raw_requests, (str, bytes)):
+            raise BatchValidationError(["batch.requests must be an array"])
+        if len(raw_requests) > MAX_BATCH_REQUESTS:
+            raise BatchValidationError([f"batch.requests exceeds {MAX_BATCH_REQUESTS} requests"])
+        canonical_requests = tuple(raw_requests)
+        if not all(isinstance(request, Request) for request in canonical_requests):
+            raise BatchValidationError(["batch.requests must contain Request values"])
+        object.__setattr__(self, "requests", canonical_requests)
         issues: list[str] = []
         if self.schema_version != 1 or isinstance(self.schema_version, bool):
             issues.append("batch.schema_version must be 1")
         if not self.requests:
             issues.append("batch.requests must be non-empty")
-        elif len(self.requests) > MAX_BATCH_REQUESTS:
-            issues.append(f"batch.requests exceeds {MAX_BATCH_REQUESTS} requests")
         request_ids = [request.request_id for request in self.requests]
         if any(request_id is None for request_id in request_ids):
             issues.append("every batch request must have a request_id")
@@ -52,7 +60,20 @@ class BatchDecision:
     policy_digest: str
     decisions: tuple[Decision, ...]
 
+    def __post_init__(self) -> None:
+        """Detach caller collections and retain the public maximum response size."""
+        raw_decisions: object = self.decisions
+        if not isinstance(raw_decisions, Sequence) or isinstance(raw_decisions, (str, bytes)):
+            raise BatchValidationError(["batch decisions must be an array"])
+        if len(raw_decisions) > MAX_BATCH_REQUESTS:
+            raise BatchValidationError([f"batch decisions exceeds {MAX_BATCH_REQUESTS} decisions"])
+        canonical_decisions = tuple(raw_decisions)
+        if not all(isinstance(decision, Decision) for decision in canonical_decisions):
+            raise BatchValidationError(["batch decisions must contain Decision values"])
+        object.__setattr__(self, "decisions", canonical_decisions)
+
     def to_dict(self) -> dict[str, Any]:
+        """Return a stable JSON-serializable batch decision contract."""
         return {
             "policy_id": self.policy_id,
             "policy_version": self.policy_version,
@@ -62,8 +83,10 @@ class BatchDecision:
         }
 
 
-def parse_batch(data: Mapping[str, Any]) -> BatchRequest:
+def parse_batch(data: object) -> BatchRequest:
     """Validate a versioned batch document with unique correlation identifiers."""
+    if not isinstance(data, Mapping):
+        raise BatchValidationError(["batch must be an object"])
     issues: list[str] = []
     unknown = sorted(set(data) - {"schema_version", "requests"})
     issues.extend(f"batch contains unknown field {field!r}" for field in unknown[:MAX_BATCH_ISSUES])

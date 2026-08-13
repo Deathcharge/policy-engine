@@ -9,11 +9,14 @@ from collections.abc import Sequence
 from typing import Any, Never
 
 from . import __version__
+from .batching import evaluate_batch, load_batch
 from .engine import PolicyEngine
 from .errors import DocumentLoadError, ValidationError
 from .loader import MAX_REQUEST_BYTES, load_policy, load_request, load_request_bytes
+from .testing import load_test_suite, run_test_suite
 
 EXIT_ALLOWED = 0
+EXIT_TEST_FAILED = 1
 EXIT_INVALID = 2
 EXIT_DENIED = 3
 
@@ -49,6 +52,16 @@ def _parser() -> argparse.ArgumentParser:
     )
     check.add_argument("--explain", action="store_true", help="include per-rule match details")
     check.add_argument("--pretty", action="store_true", help="indent JSON output")
+
+    test = subparsers.add_parser("test", help="run a JSON policy test suite")
+    test.add_argument("--policy", "-p", required=True, help="path to a JSON policy")
+    test.add_argument("--suite", "-s", required=True, help="path to a JSON policy test suite")
+    test.add_argument("--pretty", action="store_true", help="indent JSON output")
+    batch = subparsers.add_parser("batch", help="evaluate a bounded JSON request batch")
+    batch.add_argument("--policy", "-p", required=True, help="path to a JSON policy")
+    batch.add_argument("--batch", "-b", required=True, help="path to a JSON batch document")
+    batch.add_argument("--explain", action="store_true", help="include per-rule match details")
+    batch.add_argument("--pretty", action="store_true", help="indent JSON output")
     return parser
 
 
@@ -109,12 +122,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             return EXIT_ALLOWED
 
         policy = load_policy(args.policy)
+        engine = PolicyEngine(policy)
+        if args.command == "test":
+            report = run_test_suite(engine, load_test_suite(args.suite))
+            _write_json(sys.stdout, report.to_dict(), pretty=pretty)
+            return EXIT_ALLOWED if report.passed else EXIT_TEST_FAILED
+
+        if args.command == "batch":
+            result = evaluate_batch(engine, load_batch(args.batch), explain=bool(args.explain))
+            _write_json(sys.stdout, result.to_dict(), pretty=pretty)
+            return EXIT_ALLOWED
+
         request = (
             load_request_bytes(_stdin_bytes(), source="stdin")
             if args.request == "-"
             else load_request(args.request)
         )
-        decision = PolicyEngine(policy).evaluate(request, explain=bool(args.explain))
+        decision = engine.evaluate(request, explain=bool(args.explain))
         _write_json(sys.stdout, decision.to_dict(), pretty=pretty)
         return EXIT_ALLOWED if decision.allowed else EXIT_DENIED
     except (DocumentLoadError, ValidationError) as exc:

@@ -97,16 +97,18 @@ def _read_file(path: str | Path, *, max_bytes: int) -> bytes:
     return payload
 
 
+def _load_json_file(path: str | Path, *, max_bytes: int) -> dict[str, Any]:
+    return decode_json(_read_file(path, max_bytes=max_bytes), source=str(path), max_bytes=max_bytes)
+
+
 def load_policy(path: str | Path) -> Policy:
     """Load and validate a JSON policy file."""
-    payload = _read_file(path, max_bytes=MAX_POLICY_BYTES)
-    return parse_policy(decode_json(payload, source=str(path), max_bytes=MAX_POLICY_BYTES))
+    return parse_policy(_load_json_file(path, max_bytes=MAX_POLICY_BYTES))
 
 
 def load_request(path: str | Path) -> Request:
     """Load and validate a JSON request file."""
-    payload = _read_file(path, max_bytes=MAX_REQUEST_BYTES)
-    return parse_request(decode_json(payload, source=str(path), max_bytes=MAX_REQUEST_BYTES))
+    return parse_request(_load_json_file(path, max_bytes=MAX_REQUEST_BYTES))
 
 
 def load_request_bytes(payload: bytes, *, source: str = "request input") -> Request:

@@ -4,6 +4,7 @@ import json
 from importlib.metadata import metadata, version
 from importlib.resources import files
 from pathlib import Path
+from urllib.parse import urljoin
 
 from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
@@ -11,6 +12,7 @@ from referencing import Registry, Resource
 from policy_engine import (
     PolicyEngine,
     __version__,
+    load_batch,
     load_policy,
     load_request,
     load_test_suite,
@@ -28,8 +30,12 @@ def load_schema(name: str) -> dict:
 def validator(name: str) -> Draft202012Validator:
     schema = load_schema(name)
     request_schema = load_schema("request.schema.json")
-    registry = Registry().with_resource(
-        request_schema["$id"], Resource.from_contents(request_schema)
+    request_resource = Resource.from_contents(request_schema)
+    registry = Registry().with_resources(
+        [
+            (request_schema["$id"], request_resource),
+            (urljoin(schema["$id"], "request.schema.json"), request_resource),
+        ]
     )
     return Draft202012Validator(schema, registry=registry)
 
@@ -42,6 +48,7 @@ def test_packaged_schemas_are_present_and_valid_json() -> None:
             "request.schema.json",
             "decision.schema.json",
             "test-suite.schema.json",
+            "batch.schema.json",
         )
     }
 
@@ -78,6 +85,10 @@ def test_examples_conform_to_public_schemas() -> None:
     assert run_test_suite(
         PolicyEngine(load_policy(gateway_policy)), load_test_suite(gateway_suite)
     ).passed
+
+    batch_path = ROOT / "examples" / "request.batch.json"
+    validator("batch.schema.json").validate(json.loads(batch_path.read_text(encoding="utf-8")))
+    assert len(load_batch(batch_path).requests) == 2
 
 
 def test_distribution_and_api_versions_match() -> None:

@@ -34,7 +34,7 @@ python -m twine check dist/*
 ```
 
 Inspect the wheel and source archive separately. The wheel must contain only the importable
-`policy_engine` package, all four JSON schemas, the typing marker, and its distribution metadata
+`policy_engine` package, all five JSON schemas, the typing marker, and its distribution metadata
 and license file. The source archive additionally contains the maintainer documentation, examples,
 tests, and development requirements declared by `MANIFEST.in`. Neither artifact may contain
 credentials, virtual environments, caches, build logs, or the historical `helix_core` extraction.
@@ -57,13 +57,13 @@ wheel-smoke/bin/samsarix-policy test \
   --policy "$REPOSITORY_ROOT"/examples/agent-tool-gateway/policy.json \
   --suite "$REPOSITORY_ROOT"/examples/agent-tool-gateway/policy-tests.json \
   --pretty
-wheel-smoke/bin/python -I -c "from importlib.resources import files; assert files('policy_engine').joinpath('schemas', 'test-suite.schema.json').is_file()"
+wheel-smoke/bin/python -I -c "from importlib.resources import files; root = files('policy_engine').joinpath('schemas'); assert all(root.joinpath(name).is_file() for name in ('policy.schema.json', 'request.schema.json', 'decision.schema.json', 'test-suite.schema.json', 'batch.schema.json'))"
 ```
 
 Use `wheel-smoke\Scripts\` instead of `wheel-smoke/bin/` on Windows. Also verify the denied fixture
 exits `3` and invalid input exits `2`. The policy-suite command must exit `0` with `passed: true`,
-`total: 7`, and `failed_count: 0`; the final command verifies that the installed wheel exposes the
-test-suite schema used by editors and integrations.
+`total: 7`, and `failed_count: 0`; the final command verifies that the installed wheel exposes all
+five schemas used by editors and integrations.
 
 ## 4. Tag and stage
 

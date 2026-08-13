@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from policy_engine.cli import EXIT_ALLOWED, EXIT_DENIED, EXIT_INVALID, main
+from policy_engine.cli import EXIT_ALLOWED, EXIT_DENIED, EXIT_INVALID, EXIT_TEST_FAILED, main
 
 
 def write_documents(tmp_path):
@@ -92,3 +92,42 @@ def test_invalid_command_is_structured_json(capsys) -> None:
         main(["check"])
     assert raised.value.code == EXIT_INVALID
     assert json.loads(capsys.readouterr().err)["error"]["code"] == "invalid_command"
+
+
+def test_policy_test_command_reports_passes_and_assertion_failures(tmp_path, capsys) -> None:
+    policy, _, _ = write_documents(tmp_path)
+    suite = tmp_path / "suite.json"
+    suite.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "name": "CLI suite",
+                "cases": [
+                    {
+                        "name": "public read",
+                        "request": {
+                            "principal": "u",
+                            "action": "read",
+                            "resource": "public:1",
+                        },
+                        "expect": {"allowed": True, "reason": "explicit_allow"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert main(["test", "-p", str(policy), "-s", str(suite), "--pretty"]) == EXIT_ALLOWED
+    report = json.loads(capsys.readouterr().out)
+    assert report["passed"] is True
+    assert report["total"] == 1
+
+    document = json.loads(suite.read_text(encoding="utf-8"))
+    document["cases"][0]["expect"]["allowed"] = False
+    suite.write_text(json.dumps(document), encoding="utf-8")
+
+    assert main(["test", "-p", str(policy), "-s", str(suite)]) == EXIT_TEST_FAILED
+    report = json.loads(capsys.readouterr().out)
+    assert report["passed"] is False
+    assert report["failed_count"] == 1

@@ -2,13 +2,27 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, TypeAlias
+from types import MappingProxyType
+from typing import Any, TypeAlias, cast
 
 JsonScalar: TypeAlias = str | int | float | bool | None
 JsonValue: TypeAlias = JsonScalar | list["JsonValue"] | dict[str, "JsonValue"]
+FrozenJsonValue: TypeAlias = (
+    JsonScalar | tuple["FrozenJsonValue", ...] | Mapping[str, "FrozenJsonValue"]
+)
+JsonLike: TypeAlias = JsonValue | FrozenJsonValue
 ConditionValue: TypeAlias = JsonScalar | tuple[JsonScalar, ...]
+
+
+def _freeze_json(value: Any) -> FrozenJsonValue:
+    if isinstance(value, Mapping):
+        return MappingProxyType({key: _freeze_json(child) for key, child in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_json(child) for child in value)
+    return cast(JsonScalar, value)
 
 
 class Effect(StrEnum):
@@ -54,6 +68,11 @@ class Rule:
     conditions: tuple[Condition, ...] = ()
     description: str = ""
 
+    def __post_init__(self) -> None:
+        paths = [condition.path for condition in self.conditions]
+        if len(paths) != len(set(paths)):
+            raise ValueError("rule conditions must use unique paths")
+
 
 @dataclass(frozen=True, slots=True)
 class Policy:
@@ -73,8 +92,11 @@ class Request:
     principal: str
     action: str
     resource: str
-    context: dict[str, JsonValue]
+    context: Mapping[str, JsonLike]
     request_id: str | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "context", _freeze_json(dict(self.context)))
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,7 +130,7 @@ class Decision:
     matched_rule_ids: tuple[str, ...]
     allow_rule_ids: tuple[str, ...]
     deny_rule_ids: tuple[str, ...]
-    evaluations: tuple[RuleEvaluation, ...] = ()
+    evaluations: tuple[RuleEvaluation, ...] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return a stable JSON-serializable decision contract."""
@@ -124,6 +146,6 @@ class Decision:
             "allow_rule_ids": list(self.allow_rule_ids),
             "deny_rule_ids": list(self.deny_rule_ids),
         }
-        if self.evaluations:
+        if self.evaluations is not None:
             result["evaluations"] = [evaluation.to_dict() for evaluation in self.evaluations]
         return result

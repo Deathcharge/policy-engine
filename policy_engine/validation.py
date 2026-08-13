@@ -15,6 +15,7 @@ MAX_PATTERN_ITEMS = 64
 MAX_CONDITIONS = 64
 MAX_CONTEXT_DEPTH = 16
 MAX_CONTEXT_NODES = 10_000
+MAX_POLICY_NODES = 250_000
 MAX_VALIDATION_ISSUES = 100
 MAX_STRING_LENGTH = 16_384
 MAX_IDENTIFIER_LENGTH = 128
@@ -51,7 +52,9 @@ class _Issues(list[str]):
         return result
 
 
-def _validate_json_value(value: Any, *, label: str) -> list[str]:
+def _validate_json_value(
+    value: Any, *, label: str, max_nodes: int = MAX_CONTEXT_NODES
+) -> list[str]:
     issues = _Issues()
     nodes = 0
     nodes_exceeded = False
@@ -61,8 +64,8 @@ def _validate_json_value(value: Any, *, label: str) -> list[str]:
         if nodes_exceeded:
             return
         nodes += 1
-        if nodes > MAX_CONTEXT_NODES:
-            issues.append(f"{label} exceeds {MAX_CONTEXT_NODES} JSON values")
+        if nodes > max_nodes:
+            issues.append(f"{label} exceeds {max_nodes} JSON values")
             nodes_exceeded = True
             return
         if depth > MAX_CONTEXT_DEPTH:
@@ -206,7 +209,7 @@ def parse_policy(data: Mapping[str, Any]) -> Policy:
     """Validate a mapping and return an immutable policy."""
     document = dict(data)
     issues = _Issues()
-    issues.extend(_validate_json_value(document, label="policy"))
+    issues.extend(_validate_json_value(document, label="policy", max_nodes=MAX_POLICY_NODES))
     issues.extend(_unknown_keys(document, _POLICY_KEYS, "policy"))
 
     schema_uri = document.get("$schema")

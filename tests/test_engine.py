@@ -164,6 +164,16 @@ def test_explain_reports_fields_not_sensitive_values() -> None:
     assert "private" not in str(output)
 
 
+def test_explain_includes_an_empty_trace_for_a_policy_without_rules() -> None:
+    output = decide(policy(), request(), explain=True).to_dict()
+
+    assert output["evaluations"] == []
+
+
+def test_non_explained_decision_omits_trace() -> None:
+    assert "evaluations" not in decide(policy(), request()).to_dict()
+
+
 def test_explicit_request_id_is_preserved() -> None:
     decision = decide(policy(rule("allow", "allow")), request(request_id="trace-123"))
     assert decision.request_id == "trace-123"

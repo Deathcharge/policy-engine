@@ -42,6 +42,8 @@ Install the local package and run the included decision:
 python -m pip install -e .
 samsarix-policy validate examples/policy.json
 samsarix-policy check --policy examples/policy.json --request examples/request.allowed.json --pretty
+samsarix-policy test --policy examples/agent-tool-gateway/policy.json \
+  --suite examples/agent-tool-gateway/policy-tests.json --pretty
 ```
 
 The allowed example exits `0` and prints a JSON decision. The denied example prints a denial and
@@ -54,6 +56,11 @@ samsarix-policy check --policy examples/policy.json --request examples/request.d
 Invalid policy, request, or command input exits `2` and writes structured JSON to stderr. This
 makes the CLI predictable in shell scripts without conflating a policy denial with an execution
 failure.
+
+Policy suites make expected behavior executable in CI. A valid suite with failed expectations exits
+`1`, while invalid suite input exits `2`. See [Policy testing](docs/POLICY_TESTING.md) and the
+[agent tool gateway](examples/agent-tool-gateway/README.md) for a caller that checks a decision
+before invoking an operation.
 
 ## Policy example
 
@@ -91,8 +98,13 @@ Only `*` is special in principal, action, and resource patterns. It matches zero
 characters; regex metacharacters have no special meaning. Conditions are ANDed and use dotted
 paths under the request's `context` object. See [Policy format](docs/POLICY_FORMAT.md) for the full
 contract and the bundled [policy](policy_engine/schemas/policy.schema.json),
-[request](policy_engine/schemas/request.schema.json), and
-[decision](policy_engine/schemas/decision.schema.json) schemas for editor and integration support.
+[request](policy_engine/schemas/request.schema.json),
+[decision](policy_engine/schemas/decision.schema.json), and
+[test-suite](policy_engine/schemas/test-suite.schema.json), and
+[batch](policy_engine/schemas/batch.schema.json) schemas for editor and integration
+support.
+
+For multi-action gateways and jobs, see [bounded batch evaluation](docs/BATCH_EVALUATION.md).
 
 ## Python API
 
@@ -128,6 +140,8 @@ samsarix-policy --version
 samsarix-policy validate POLICY [--pretty]
 samsarix-policy check --policy POLICY --request REQUEST|-
                    [--explain] [--pretty]
+samsarix-policy test --policy POLICY --suite TEST_SUITE [--pretty]
+samsarix-policy batch --policy POLICY --batch BATCH [--explain] [--pretty]
 ```
 
 Use `--request -` to read a request from stdin. Policy files are limited to 1 MiB, request files
@@ -183,6 +197,8 @@ See [SECURITY.md](SECURITY.md) for the trust boundary and responsible-reporting 
   regex. These constraints keep evaluation reviewable and bounded.
 - Policies are loaded explicitly. Hot reload, signing, remote bundles, and decision-log sinks remain
   embedding concerns.
+- Test suites verify supplied cases; they do not prove that callers enforce decisions or construct
+  truthful request attributes.
 - `default: "allow"` exists for migration scenarios but should be chosen deliberately.
 
 ## Contributing and release status
@@ -190,7 +206,9 @@ See [SECURITY.md](SECURITY.md) for the trust boundary and responsible-reporting 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the verified workflow and
 [docs/PRODUCTIZATION.md](docs/PRODUCTIZATION.md) for the assessment, acceptance criteria, remaining
 work, and release disposition. Maintainers should follow the
-[release runbook](docs/RELEASING.md). Version history is recorded in [CHANGELOG.md](CHANGELOG.md).
+[release runbook](docs/RELEASING.md). The researched product wedge and sequenced competitive gaps
+are recorded in [Competitive landscape](docs/COMPETITIVE_LANDSCAPE.md). Version history is recorded
+in [CHANGELOG.md](CHANGELOG.md).
 
 For product support, use the [Samsarix Help Center](https://www.samsarix.com/help) or email
 [support@samsarix.com](mailto:support@samsarix.com). Report vulnerabilities through the private
@@ -200,7 +218,7 @@ channel in [SECURITY.md](SECURITY.md), not a public issue.
 
 Copyright is held by Samsarix LLC. The repository uses Business Source License 1.1 with
 version-specific parameters, a change date of June 16, 2027, and Apache License 2.0 as its change
-license. It is source-available but is not an Open Source license before conversion. The
+license. It is source-available but is not an open-source license before conversion. The
 Additional Use Grant permits up to 1,000 production policy evaluations per calendar month across
 all deployments under the user's control; higher-volume production use requires an alternative
 commercial license. Review

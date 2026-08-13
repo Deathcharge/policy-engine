@@ -6,7 +6,8 @@ This roadmap separates four gates: merge, release, publication, and flagship ado
 
 Portfolio role: **reusable library or sdk**. Keep this as a small, independently versioned package. Samsarix Unified should consume it only through a public API adapter; private monorepo imports and copied implementations are out of scope.
 
-Current disposition: Merge the productization branch after exact-head verification and rollback-ref creation; release and adoption remain separate decisions.
+Current disposition: The productization branch is merged with green CI and installable wheel/sdist
+evidence. Release, publication, and flagship adoption remain separate decisions.
 
 ## Stabilize the productized default
 
@@ -26,12 +27,19 @@ Current disposition: Merge the productization branch after exact-head verificati
 
 Current hardening backlog:
 
-- No demonstrated caller actually enforces its decisions.
+- A regression-tested agent-tool example now enforces decisions before invoking callbacks. A
+  production consumer and representative-user evidence are still required for flagship adoption.
 - No signed policy distribution, hot reload, policy version service, audit sink, identity model, or multi-process cache; these are acceptable exclusions but limit the wedge.
 - Wildcard and condition semantics are deliberately small and may be insufficient for complex authorization.
 - The 1,000-evaluation monthly BSL production grant is poorly aligned with normal policy-engine volume.
-- Package publication, CI success, wheel behavior, and name ownership are unverified.
+- CI and wheel/sdist behavior are verified. PyPI package-name ownership and trusted-publisher
+  configuration still require owner evidence before publication.
 - The flagship already contains multiple policy implementations, leaving canonical ownership unresolved.
+
+Bounded batch evaluation is implemented with strict correlation and resource limits. The next
+competitive increments are versioned policy artifacts, an opt-in redacted audit adapter, and
+consumer-specific enforcement adapters. The evidence and rationale are
+recorded in `docs/COMPETITIVE_LANDSCAPE.md`.
 
 ## Samsarix adoption
 

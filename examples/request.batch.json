@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "requests": [
+    {"request_id": "allow-1", "principal": "agent:demo", "action": "file.read", "resource": "workspace/public/guide.txt"},
+    {"request_id": "deny-1", "principal": "agent:demo", "action": "file.read", "resource": "secrets/.env"}
+  ]
+}

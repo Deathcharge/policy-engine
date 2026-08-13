@@ -15,6 +15,7 @@ until the owner publishes a release.
 - Immutable validated policy values that cannot be changed through caller-owned lists.
 - Policy, request, decision, and policy-test JSON Schemas with validated examples.
 - Schema-validated policy test suites, a stable test report API, and `samsarix-policy test` for CI.
+- Correlation-safe batch evaluation for up to 1,000 requests through the API and CLI.
 - A regression-tested agent-tool enforcement example covering explicit allow, explicit deny,
   default deny, overlapping rules, environment boundaries, and approvals.
 - Examples, tests, pinned CI, dependency maintenance, candidate-artifact automation, structured

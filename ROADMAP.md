@@ -42,6 +42,10 @@ enforcement consumer are implemented. Further framework adapters, signing, and h
 follow representative-user demand, not block evaluation of the release candidate. The rationale is
 recorded in `docs/COMPETITIVE_LANDSCAPE.md`.
 
+An optional, correctness-checked benchmark corpus now covers gateway, rule-scaling, and batch
+workloads. Use `docs/PERFORMANCE.md` to characterize a target host; shared-runner timing is not a
+production capacity guarantee. Representative consumer trials remain the next adoption gate.
+
 ## Samsarix adoption
 
 - Define a public API, event, schema, artifact, or deployment contract before connecting to Samsarix Unified.

@@ -23,6 +23,12 @@ Run the complete gate from a clean checkout:
 
 ```bash
 python -m venv .venv
+```
+
+Activate it with `source .venv/bin/activate` on macOS/Linux or
+`.venv\Scripts\Activate.ps1` in Windows PowerShell. Then run these commands using that environment:
+
+```bash
 python -m pip install -r requirements-dev.txt
 python -m ruff format --check .
 python -m ruff check .

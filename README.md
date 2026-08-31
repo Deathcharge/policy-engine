@@ -42,8 +42,7 @@ Install the local package and run the included decision:
 python -m pip install -e .
 samsarix-policy validate examples/policy.json
 samsarix-policy check --policy examples/policy.json --request examples/request.allowed.json --pretty
-samsarix-policy test --policy examples/agent-tool-gateway/policy.json \
-  --suite examples/agent-tool-gateway/policy-tests.json --pretty
+samsarix-policy test --policy examples/agent-tool-gateway/policy.json --suite examples/agent-tool-gateway/policy-tests.json --pretty
 ```
 
 The allowed example exits `0` and prints a JSON decision. The denied example prints a denial and

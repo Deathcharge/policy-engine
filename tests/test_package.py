@@ -100,6 +100,16 @@ def test_distribution_and_api_versions_match() -> None:
     assert distribution.get_all("License-File") == ["LICENSE"]
 
 
+def test_benchmark_tools_do_not_become_runtime_dependencies() -> None:
+    distribution = metadata("samsarix-policy-engine")
+    requirements = distribution.get_all("Requires-Dist", [])
+    assert requirements
+    assert all("extra ==" in requirement for requirement in requirements)
+    benchmark = [requirement for requirement in requirements if requirement.startswith("pyperf")]
+    assert len(benchmark) == 1
+    assert 'extra == "dev"' in benchmark[0]
+
+
 def test_license_uses_standard_busl_parameters() -> None:
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
 

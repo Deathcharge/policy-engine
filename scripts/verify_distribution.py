@@ -39,6 +39,8 @@ def main() -> None:
         for directory in ("docs", "examples", "tests", "scripts"):
             assert any(name.startswith(directory + "/") for name in names), directory
         assert "requirements-dev.txt" in names
+        assert "scripts/benchmark_policy.py" in names
+        assert "docs/PERFORMANCE.md" in names
         assert not any(
             part in {".venv", ".git", "__pycache__", "helix_core"}
             for name in names

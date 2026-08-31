@@ -273,9 +273,27 @@ identity. No other repository, website, account, infrastructure, or Git history 
 
 1. Representative integration trials: attribute construction, enforcement coverage, expected load,
    licensing fit, and support expectations.
-2. Measured benchmark corpus and workload-specific batch/explanation limits if needed.
+2. Apply the implemented benchmark corpus (`docs/PERFORMANCE.md`) to the target deployment host
+   and actual policy shapes; set application-specific batch/explanation budgets from those trials.
 3. Framework adapters driven by those trials; signing/hot reload only with explicit requirements.
    No general-purpose hosted control plane is planned for this library.
 
 Disposition: **engineering release candidate with named external gates**, not a published or
 independently production-validated offering. Optional roadmap items are not core-path placeholders.
+
+## 2026-08-31 workload-characterization increment
+
+Added a versioned 20-workload synthetic corpus and optional pyperf harness for the public API. It
+separates engine construction, request parsing, mapping/parsed evaluation, allow/deny/audit guard
+paths, rule/pattern/condition scaling, batch parsing, batch evaluation, and explained JSON output.
+Every timed operation has an untimed correctness preflight, deterministic input fingerprint, source
+fingerprint, and harness fingerprint. Unit tests cover every case; Linux and Windows CI execute the
+actual worker flow without using shared-runner timings as thresholds. `docs/PERFORMANCE.md` records
+exact timing boundaries, a deliberately caveated local characterization, privacy considerations,
+and comparison methodology. Runtime dependencies remain empty; pyperf is a development-only tool.
+
+The local run confirmed a material workload-shape effect and the expected sequential all-rule scan,
+but emitted stability warnings on the desktop host. It is evidence that the corpus works, not a
+latency claim or replacement for representative consumer trials. Application-specific performance
+budgets, production security review, license confirmation, package publication, and actual adoption
+remain owner/external gates.

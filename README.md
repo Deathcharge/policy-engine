@@ -171,6 +171,11 @@ CI runs the same meaningful checks across supported Python versions. A wheel-ins
 also part of release verification. The runtime intentionally has no third-party dependencies, so
 there is no application dependency lockfile; development tools are constrained in the `dev` extra.
 
+For workload sizing and repeatable measurements, see [Performance](docs/PERFORMANCE.md). From a
+checkout or source archive, the development extra installs pyperf for the correctness-checked
+harness covering gateway, rule-scaling, and batch workloads. These tools are not required for
+runtime installation or policy evaluation; the harness does not ship inside the runtime wheel.
+
 ## Architecture
 
 The enforcement point creates a request and calls `PolicyEngine.evaluate`. Strict loading and

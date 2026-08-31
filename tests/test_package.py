@@ -119,3 +119,13 @@ def test_license_uses_standard_busl_parameters() -> None:
     assert "Covenants of Licensor" in license_text
     assert "4. Not to modify this License in any other way." in license_text
     assert "California" not in license_text
+
+
+def test_release_workflow_remains_bounded_audited_and_non_publishing() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    assert "timeout-minutes: 10" in workflow
+    assert "python -m pip_audit --local --progress-spinner off" in workflow
+    assert "permissions:\n  contents: read" in workflow
+    assert "id-token: write" not in workflow
+    assert "pypa/gh-action-pypi-publish" not in workflow
+    assert "gh release" not in workflow

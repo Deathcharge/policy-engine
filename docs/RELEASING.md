@@ -10,6 +10,8 @@ performed until the legal and account gates below are complete.
 - Confirm that `samsarix-policy-engine` is controlled by Samsarix LLC on PyPI.
 - Configure PyPI trusted publishing for the exact GitHub repository and a protected `pypi`
   environment. Do not store a long-lived PyPI token in the repository.
+- Protect `main` with a ruleset or branch protection requiring the meaningful CI checks and pull
+  request review; document a controlled owner bypass for emergency rollback.
 - Confirm `contact@samsarix.com` and `support@samsarix.com` are monitored.
 - Obtain independent security and representative-user review for production adoption.
 

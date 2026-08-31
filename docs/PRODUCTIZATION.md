@@ -119,7 +119,7 @@ planned checks as passed.
 
 - [ ] Optional signed-policy verification adapter.
 - [ ] Optional policy-set hot reload with atomic last-known-good behavior.
-- [ ] Performance benchmark corpus for the 512-rule upper bound.
+- [x] Performance benchmark corpus for the 512-rule upper bound.
 - [ ] More condition primitives only when validated user demand justifies the complexity.
 
 ## Implementation checklist
@@ -173,7 +173,7 @@ planned checks as passed.
   Samsarix LLC.
 - **Owner/release:** Reserve `samsarix-policy-engine` on PyPI, configure trusted publishing, and
   publish only after license review. Verify installation from the public artifact. The exact PyPI
-  project endpoint returned 404 during the 2026-07-28 availability check, but that is not a
+  JSON project endpoint returned 404 again during the 2026-08-31 release-state audit, but that is not a
   reservation or guarantee.
 - **Owner/portfolio:** Decide whether the old `helix_core` extraction should live in a separate
   archival repository. Git history is sufficient for this release candidate.
@@ -184,6 +184,10 @@ planned checks as passed.
 - **Owner/security:** Run an independent security review before a production rollout. The automated
   scanner is intentionally skipped per owner direction; the repository receives direct manual
   review, adversarial tests, dependency auditing, and bounded-input verification instead.
+- **Owner/repository controls:** `main` had no GitHub branch protection during the 2026-08-31 audit.
+  Before public publication, configure a ruleset or branch protection requiring the meaningful CI
+  checks and pull-request review, with an owner-documented emergency bypass/rollback path. Verify
+  the rule against a test pull request rather than assuming the settings page is effective.
 
 ## Known risks
 
@@ -250,10 +254,11 @@ Completed the remaining local promotion/enforcement workflow:
   pip 26.1.2. Upgraded locally to 26.2.1 and re-audited: no known vulnerabilities (unpublished local
   package skipped). Runtime dependencies remain empty.
 
-Local verification: formatting, lint and strict mypy passed; 150 tests passed with 93.15%
+Local verification: formatting, lint and strict mypy passed; 162 tests passed with 93.27%
 branch-aware coverage. Wheel and sdist build/Twine checks and isolated installed journeys passed.
 Final distribution checks use `python scripts/verify_distribution.py --dist
-dist/candidate-20260831-final`; exact final artifact hashes and CI results belong in the PR record.
+dist/candidate-release-audit-20260831`; exact final artifact hashes and CI results belong in the PR
+record.
 
 ### Remaining owner-controlled release gates
 
@@ -297,3 +302,26 @@ but emitted stability warnings on the desktop host. It is evidence that the corp
 latency claim or replacement for representative consumer trials. Application-specific performance
 budgets, production security review, license confirmation, package publication, and actual adoption
 remain owner/external gates.
+
+## 2026-08-31 live release-state audit
+
+- `main` was clean and synchronized at `1c2dfa6`; all seven post-merge CI jobs passed. There were no
+  open pull requests or issues, no GitHub releases, and no `v*` release tag.
+- The GitHub repository description, homepage, and topics were refreshed to identify the Samsarix
+  product and current website while retaining `Deathcharge/policy-engine` as the temporary home.
+- `https://pypi.org/pypi/samsarix-policy-engine/json` returned 404. No ownership or availability is
+  inferred from that response, and no project reservation or publication was attempted.
+- GitHub Actions had no repository secrets or variables and no `pypi` environment. The only listed
+  environment was `github-pages`. This confirms that trusted publishing is not configured; it does
+  not prove that no credential exists outside repository Actions settings.
+- `main` had no branch protection. Default workflow permissions were read-only and could not approve
+  pull requests, but the repository allowed all Actions and did not require action SHA pinning. The
+  committed workflows nevertheless pin every external action to a full commit SHA.
+- `https://www.samsarix.com/`, `/help`, and `/pricing` returned HTTP 200; the homepage footer linked
+  to the current `Deathcharge/samsarix-unified` repository and exposed `contact@samsarix.com`.
+  Whether the two supplied email inboxes are monitored cannot be verified without sending mail,
+  which was not authorized or attempted.
+
+The non-publishing release workflow now includes the same local dependency audit required by this
+record and the release runbook, plus a ten-minute job bound. It still has read-only contents
+permission and cannot publish, create tags/releases, or mutate repository contents.

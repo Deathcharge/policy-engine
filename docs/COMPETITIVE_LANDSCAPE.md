@@ -1,6 +1,7 @@
 # Competitive landscape and product wedge
 
-Research refreshed August 8, 2026. This document records product decisions, not compatibility or
+Research refreshed August 31, 2026 (OPA bundles and OpenFGA immutable-model guidance rechecked).
+This document records product decisions, not compatibility or
 feature-parity claims.
 
 ## Recurring capabilities
@@ -25,15 +26,15 @@ a daemon, policy language runtime, database, or telemetry.
 
 ## Prioritized increments
 
-1. **Executable policy suites and enforcement example** — implemented in the current increment.
-2. **Bounded batch evaluation** — evaluate heterogeneous requests with stable per-item results and
+1. **Executable policy suites and enforcement example** — implemented.
+2. **Bounded batch evaluation** — implemented; evaluate heterogeneous requests with stable per-item results and
    clear whole-batch validation/failure semantics.
-3. **Versioned policy artifacts** — a manifest containing policy digest, application compatibility,
-   and test evidence; signature verification only with a reviewed cryptographic dependency.
-4. **Opt-in audit adapter** — caller-owned sink interface, explicit redaction, backpressure behavior,
-   and correlation IDs; never silent telemetry.
-5. **Consumer adapters** — framework-specific enforcement examples only after the core contracts are
-   stable and each adapter has a side-effect-boundary integration test.
+3. **Versioned policy artifacts** — implemented: full manifest digest, exact application contract,
+   revision, and optional passing-test evidence; trusted pins required for deployment loading.
+4. **Opt-in audit adapter** — implemented: minimized events, synchronous caller-owned sink,
+   fail-closed delivery, and opt-in correlation IDs; no silent telemetry.
+5. **Consumer adapters** — the pinned file gateway proves a real local side-effect boundary.
+   Framework-specific adapters remain demand-driven; no dependency-heavy web framework is required.
 
 ## Deliberate non-goals
 

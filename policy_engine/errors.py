@@ -33,3 +33,7 @@ class TestSuiteValidationError(ValidationError):
 
 class BatchValidationError(ValidationError):
     """Raised when a batch request document is invalid."""
+
+
+class ArtifactValidationError(ValidationError):
+    """Raised when artifact structure, integrity, or deployment pins do not match."""

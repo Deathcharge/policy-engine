@@ -40,13 +40,8 @@ jobs:
           PY
       - run: python -m build
       - run: python -m twine check dist/*
-      - name: Smoke-test wheel
-        run: |
-          python -m venv /tmp/samsarix-policy-release
-          /tmp/samsarix-policy-release/bin/python -m pip install --no-deps dist/*.whl
-          cd /tmp
-          /tmp/samsarix-policy-release/bin/samsarix-policy --version
-          /tmp/samsarix-policy-release/bin/python -I -c "from importlib.resources import files; import policy_engine; assert files('policy_engine').joinpath('schemas', 'decision.schema.json').is_file()"
+      - name: Verify distributions and installed journeys
+        run: python scripts/verify_distribution.py
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: samsarix-policy-engine-${{ github.run_id }}

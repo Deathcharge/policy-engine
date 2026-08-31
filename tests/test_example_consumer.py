@@ -45,3 +45,14 @@ def test_agent_tool_gateway_enforces_before_calling_operation() -> None:
     assert allowed["executed"] is True
     assert allowed["result"] == "executed"
     assert called is True
+
+
+def test_pinned_gateway_real_read_and_denied_callback(capsys):
+    import json
+
+    example = runpy.run_path(str(ROOT / "examples" / "pinned_gateway.py"))
+    example["main"]()
+    report = json.loads(capsys.readouterr().out)
+    assert report["result"].startswith("A real document read")
+    assert not report["denied_operation_executed"]
+    assert [event["allowed"] for event in report["audit"]] == [True, False]

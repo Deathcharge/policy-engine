@@ -96,7 +96,22 @@ class Request:
     request_id: str | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "context", _freeze_json(dict(self.context)))
+        from .validation import _request_fields
+
+        principal, action, resource, context, request_id = _request_fields(
+            {
+                "principal": self.principal,
+                "action": self.action,
+                "resource": self.resource,
+                "context": self.context,
+                "request_id": self.request_id,
+            }
+        )
+        object.__setattr__(self, "principal", principal)
+        object.__setattr__(self, "action", action)
+        object.__setattr__(self, "resource", resource)
+        object.__setattr__(self, "request_id", request_id)
+        object.__setattr__(self, "context", _freeze_json(context))
 
 
 @dataclass(frozen=True, slots=True)

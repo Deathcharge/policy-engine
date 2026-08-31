@@ -6,14 +6,22 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any, Never
 
 from . import __version__
+from .artifacts import create_artifact, load_artifact
 from .batching import evaluate_batch, load_batch
 from .engine import PolicyEngine
 from .errors import DocumentLoadError, ValidationError
-from .loader import MAX_REQUEST_BYTES, load_policy, load_request, load_request_bytes
-from .testing import load_test_suite, run_test_suite
+from .loader import (
+    MAX_REQUEST_BYTES,
+    _load_json_file,
+    load_policy,
+    load_request,
+    load_request_bytes,
+)
+from .testing import MAX_TEST_SUITE_BYTES, load_test_suite, run_test_suite
 
 EXIT_ALLOWED = 0
 EXIT_TEST_FAILED = 1
@@ -46,7 +54,13 @@ def _parser() -> argparse.ArgumentParser:
     validate.add_argument("--pretty", action="store_true", help="indent JSON output")
 
     check = subparsers.add_parser("check", help="evaluate one action request")
-    check.add_argument("--policy", "-p", required=True, help="path to a JSON policy")
+    source = check.add_mutually_exclusive_group(required=True)
+    source.add_argument("--policy", "-p", help="path to a JSON policy")
+    source.add_argument("--artifact", help="path to a pinned policy artifact")
+    check.add_argument("--sha256", help="trusted full artifact digest (required with --artifact)")
+    check.add_argument(
+        "--application", help="expected application contract (required with --artifact)"
+    )
     check.add_argument(
         "--request", "-r", required=True, help="path to a JSON request, or - to read stdin"
     )
@@ -62,6 +76,22 @@ def _parser() -> argparse.ArgumentParser:
     batch.add_argument("--batch", "-b", required=True, help="path to a JSON batch document")
     batch.add_argument("--explain", action="store_true", help="include per-rule match details")
     batch.add_argument("--pretty", action="store_true", help="indent JSON output")
+
+    pack = subparsers.add_parser("pack", help="create a deterministic, unsigned policy artifact")
+    pack.add_argument("--policy", "-p", required=True)
+    pack.add_argument("--revision", required=True)
+    pack.add_argument("--application", required=True)
+    pack.add_argument("--suite", help="require this JSON suite to pass before packaging")
+    pack.add_argument("--output", required=True, help="new artifact file (never overwrites)")
+    pack.add_argument("--pretty", action="store_true")
+
+    verify = subparsers.add_parser(
+        "verify-artifact", help="verify trusted artifact and application pins"
+    )
+    verify.add_argument("--artifact", required=True)
+    verify.add_argument("--sha256", required=True)
+    verify.add_argument("--application", required=True)
+    verify.add_argument("--pretty", action="store_true")
     return parser
 
 
@@ -101,9 +131,60 @@ def _error(exc: Exception, *, pretty: bool) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the CLI and return a process exit code."""
-    args = _parser().parse_args(argv)
+    parser = _parser()
+    args = parser.parse_args(argv)
+    if args.command == "check":
+        if args.artifact and (not args.sha256 or not args.application):
+            parser.error(
+                "--artifact requires --sha256 and --application from trusted configuration"
+            )
+        if args.policy and (args.sha256 or args.application):
+            parser.error("--sha256 and --application require --artifact")
     pretty = bool(args.pretty)
     try:
+        if args.command == "pack":
+            suite = (
+                _load_json_file(args.suite, max_bytes=MAX_TEST_SUITE_BYTES) if args.suite else None
+            )
+            artifact = create_artifact(
+                load_policy(args.policy),
+                revision=args.revision,
+                application=args.application,
+                suite=suite,
+            )
+            payload = artifact.to_bytes()
+            try:
+                with Path(args.output).open("xb") as handle:
+                    handle.write(payload)
+            except OSError as exc:
+                raise DocumentLoadError(f"could not create artifact: {exc}") from exc
+            _write_json(
+                sys.stdout,
+                {
+                    "sha256": artifact.sha256,
+                    "revision": artifact.revision,
+                    "application": artifact.application,
+                },
+                pretty=pretty,
+            )
+            return EXIT_ALLOWED
+
+        if args.command == "verify-artifact":
+            artifact = load_artifact(
+                args.artifact, expected_sha256=args.sha256, application=args.application
+            )
+            _write_json(
+                sys.stdout,
+                {
+                    "valid": True,
+                    "sha256": artifact.sha256,
+                    "revision": artifact.revision,
+                    "application": artifact.application,
+                },
+                pretty=pretty,
+            )
+            return EXIT_ALLOWED
+
         if args.command == "validate":
             policy = load_policy(args.policy)
             engine = PolicyEngine(policy)
@@ -121,7 +202,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return EXIT_ALLOWED
 
-        policy = load_policy(args.policy)
+        policy = (
+            load_artifact(
+                args.artifact, expected_sha256=args.sha256, application=args.application
+            ).policy
+            if args.command == "check" and args.artifact
+            else load_policy(args.policy)
+        )
         engine = PolicyEngine(policy)
         if args.command == "test":
             report = run_test_suite(engine, load_test_suite(args.suite))

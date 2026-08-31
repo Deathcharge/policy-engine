@@ -8,7 +8,7 @@ from collections.abc import Iterable, Mapping
 from typing import Any, cast
 
 from .errors import PolicyValidationError, RequestValidationError
-from .models import Condition, ConditionValue, Effect, JsonValue, Operator, Policy, Request, Rule
+from .models import Condition, ConditionValue, Effect, Operator, Policy, Request, Rule
 
 MAX_RULES = 512
 MAX_PATTERN_ITEMS = 64
@@ -20,6 +20,7 @@ MAX_VALIDATION_ISSUES = 100
 MAX_STRING_LENGTH = 16_384
 MAX_IDENTIFIER_LENGTH = 128
 MAX_PATTERN_LENGTH = 512
+MAX_INTEGER_BITS = 4096
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 _CONTEXT_PATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*(?:\.[A-Za-z_][A-Za-z0-9_-]*){0,15}$")
@@ -74,24 +75,34 @@ def _validate_json_value(
         if item is None or isinstance(item, bool):
             return
         if isinstance(item, (int, float)):
+            if isinstance(item, int) and item.bit_length() > MAX_INTEGER_BITS:
+                issues.append(f"{path} exceeds {MAX_INTEGER_BITS} integer bits")
             if isinstance(item, float) and not math.isfinite(item):
                 issues.append(f"{path} must be a finite number")
             return
         if isinstance(item, str):
+            if any(0xD800 <= ord(character) <= 0xDFFF for character in item):
+                issues.append(f"{path} contains an unpaired Unicode surrogate")
             if len(item) > MAX_STRING_LENGTH:
                 issues.append(f"{path} exceeds {MAX_STRING_LENGTH} characters")
             return
-        if isinstance(item, list):
+        if isinstance(item, (list, tuple)):
             for index, child in enumerate(item):
+                if nodes_exceeded:
+                    break
                 visit(child, depth + 1, f"{path}[{index}]")
             return
-        if isinstance(item, dict):
+        if isinstance(item, Mapping):
             for key, child in item.items():
+                if nodes_exceeded:
+                    break
                 if not isinstance(key, str):
                     issues.append(f"{path} contains a non-string object key")
                     continue
                 if len(key) > MAX_IDENTIFIER_LENGTH:
                     issues.append(f"{path} contains an overlong object key")
+                if any(0xD800 <= ord(character) <= 0xDFFF for character in key):
+                    issues.append(f"{path} contains a Unicode surrogate in an object key")
                 visit(child, depth + 1, f"{path}.{key}")
             return
         issues.append(f"{path} contains unsupported value type {type(item).__name__}")
@@ -302,8 +313,8 @@ def parse_policy(data: Mapping[str, Any]) -> Policy:
     )
 
 
-def parse_request(data: Mapping[str, Any]) -> Request:
-    """Validate a mapping and return an immutable request."""
+def _request_fields(data: Mapping[str, Any]) -> tuple[str, str, str, Any, str | None]:
+    """Validate both parsed requests and directly constructed public values."""
     document = dict(data)
     issues = _Issues()
     issues.extend(_validate_json_value(document, label="request"))
@@ -316,7 +327,7 @@ def parse_request(data: Mapping[str, Any]) -> Request:
             issues.append(f"request.{field} exceeds {MAX_PATTERN_LENGTH} characters")
 
     context = document.get("context", {})
-    if not isinstance(context, dict):
+    if not isinstance(context, Mapping):
         issues.append("request.context must be an object")
         context = {}
 
@@ -332,10 +343,12 @@ def parse_request(data: Mapping[str, Any]) -> Request:
 
     if issues:
         raise RequestValidationError(issues.finalized())
-    return Request(
-        principal=principal,
-        action=action,
-        resource=resource,
-        context=cast(dict[str, JsonValue], context),
-        request_id=request_id,
-    )
+    return principal, action, resource, context, request_id
+
+
+def parse_request(data: Mapping[str, Any]) -> Request:
+    """Validate a mapping and return an immutable request."""
+    if not isinstance(data, Mapping):
+        raise RequestValidationError(["request must be an object"])
+    principal, action, resource, context, request_id = _request_fields(data)
+    return Request(principal, action, resource, context, request_id)

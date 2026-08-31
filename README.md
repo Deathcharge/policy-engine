@@ -99,12 +99,15 @@ characters; regex metacharacters have no special meaning. Conditions are ANDed a
 paths under the request's `context` object. See [Policy format](docs/POLICY_FORMAT.md) for the full
 contract and the bundled [policy](policy_engine/schemas/policy.schema.json),
 [request](policy_engine/schemas/request.schema.json),
-[decision](policy_engine/schemas/decision.schema.json), and
+[decision](policy_engine/schemas/decision.schema.json),
 [test-suite](policy_engine/schemas/test-suite.schema.json), and
 [batch](policy_engine/schemas/batch.schema.json) schemas for editor and integration
 support.
 
 For multi-action gateways and jobs, see [bounded batch evaluation](docs/BATCH_EVALUATION.md).
+For tested revisions, trusted deployment pins, and opt-in audited enforcement, see
+[policy artifacts](docs/POLICY_ARTIFACTS.md). Run `python examples/pinned_gateway.py` for an actual
+temporary-file read and a denied callback using the public API.
 
 ## Python API
 
@@ -142,6 +145,9 @@ samsarix-policy check --policy POLICY --request REQUEST|-
                    [--explain] [--pretty]
 samsarix-policy test --policy POLICY --suite TEST_SUITE [--pretty]
 samsarix-policy batch --policy POLICY --batch BATCH [--explain] [--pretty]
+samsarix-policy pack --policy POLICY --revision REV --application APP --output NEW_FILE [--suite SUITE]
+samsarix-policy verify-artifact --artifact FILE --sha256 TRUSTED_SHA256 --application APP
+samsarix-policy check --artifact FILE --sha256 TRUSTED_SHA256 --application APP --request REQUEST
 ```
 
 Use `--request -` to read a request from stdin. Policy files are limited to 1 MiB, request files
@@ -159,6 +165,7 @@ python -m mypy policy_engine
 python -m pytest --cov=policy_engine --cov-report=term-missing
 python -m build
 python -m twine check dist/*
+python scripts/verify_distribution.py
 ```
 
 CI runs the same meaningful checks across supported Python versions. A wheel-install smoke test is
@@ -182,7 +189,8 @@ from this product; Git history retains it at commit `da2029a` for provenance.
   decision before performing the action.
 - Policies and requests are untrusted input and are validated with bounded resource use.
 - Default-deny is the secure default, and explicit deny overrides allow.
-- The engine stores nothing, transmits nothing, and logs no request or context values.
+- Evaluation stores nothing and transmits nothing. The optional `guarded_call` audit sink is
+  caller-owned, synchronous, and off by default; audit delivery failure prevents execution.
 - Policy digests identify content but are not signatures; authenticate policy distribution in the
   embedding system when tamper resistance matters.
 - Evaluation has no external API or operating cost beyond local CPU and memory.
@@ -195,8 +203,8 @@ See [SECURITY.md](SECURITY.md) for the trust boundary and responsible-reporting 
   service, policy editor, database, or complete RBAC/ABAC platform.
 - Conditions do not execute code, call external data sources, traverse arrays by path, or support
   regex. These constraints keep evaluation reviewable and bounded.
-- Policies are loaded explicitly. Hot reload, signing, remote bundles, and decision-log sinks remain
-  embedding concerns.
+- Policies and revisioned artifacts are loaded explicitly. Hot reload, signing, remote delivery,
+  and durable audit storage remain embedding concerns.
 - Test suites verify supplied cases; they do not prove that callers enforce decisions or construct
   truthful request attributes.
 - `default: "allow"` exists for migration scenarios but should be chosen deliberately.

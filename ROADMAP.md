@@ -29,16 +29,17 @@ Current hardening backlog:
 
 - A regression-tested agent-tool example now enforces decisions before invoking callbacks. A
   production consumer and representative-user evidence are still required for flagship adoption.
-- No signed policy distribution, hot reload, policy version service, audit sink, identity model, or multi-process cache; these are acceptable exclusions but limit the wedge.
+- No signed policy distribution, hot reload, remote version service, identity model, or multi-process
+  cache. These remain deliberate exclusions. Local pinned artifacts and opt-in audit hooks exist.
 - Wildcard and condition semantics are deliberately small and may be insufficient for complex authorization.
 - The 1,000-evaluation monthly BSL production grant is poorly aligned with normal policy-engine volume.
 - CI and wheel/sdist behavior are verified. PyPI package-name ownership and trusted-publisher
   configuration still require owner evidence before publication.
 - The flagship already contains multiple policy implementations, leaving canonical ownership unresolved.
 
-Bounded batch evaluation is implemented with strict correlation and resource limits. The next
-competitive increments are versioned policy artifacts, an opt-in redacted audit adapter, and
-consumer-specific enforcement adapters. The evidence and rationale are
+Bounded batch evaluation, revisioned/pinned artifacts, minimized audit hooks, and a local file
+enforcement consumer are implemented. Further framework adapters, signing, and hot reload should
+follow representative-user demand, not block evaluation of the release candidate. The rationale is
 recorded in `docs/COMPETITIVE_LANDSCAPE.md`.
 
 ## Samsarix adoption

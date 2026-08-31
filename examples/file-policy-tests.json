@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "name": "file-gateway-v1",
+  "cases": [
+    {"name": "public read", "request": {"principal": "agent:demo", "action": "file.read", "resource": "workspace/public/guide.txt"}, "expect": {"allowed": true, "reason": "explicit_allow"}},
+    {"name": "secret overlap denied", "request": {"principal": "agent:demo", "action": "file.read", "resource": "workspace/public/.env"}, "expect": {"allowed": false, "reason": "explicit_deny"}},
+    {"name": "unapproved write denied", "request": {"principal": "agent:demo", "action": "file.write", "resource": "workspace/scratch/task.txt"}, "expect": {"allowed": false, "reason": "default_deny"}}
+  ]
+}

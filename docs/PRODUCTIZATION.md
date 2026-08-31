@@ -1,6 +1,7 @@
 # Productization record
 
-Last updated: 2026-07-28
+Last updated: 2026-08-31. Historical results below are dated; the wrap-up section describes the
+current candidate.
 
 ## Repository assessment
 
@@ -132,7 +133,7 @@ planned checks as passed.
 - [x] `validate` and `check` CLI commands.
 - [x] Runnable allow and deny examples.
 - [x] Public API documentation and policy-format reference.
-- [x] Draft 2020-12 policy, request, decision, test-suite, and batch schemas with example validation.
+- [x] Six Draft 2020-12 schemas, including artifacts, with self-contained offline bundling.
 - [x] Test suite and CI workflow.
 - [x] Build and package configuration.
 - [x] Pinned CI actions, dependency updates, candidate-artifact workflow, and release runbook.
@@ -224,3 +225,57 @@ Run locally on Windows with Python 3.11.9 on 2026-07-28:
 The engineering disposition is **release candidate**, not public-release approval. Public
 publication remains blocked on the named owner/legal license decisions and PyPI setup, and
 production use remains gated on independent security review and representative user validation.
+
+## 2026-08-31 wrap-up: current candidate
+
+Baseline: clean `main` at `8ddaa1f` after upstream dependency-maintenance merges, 115 passing tests.
+Completed the remaining local promotion/enforcement workflow:
+
+- Deterministic unsigned artifacts pin revision, exact application contract, normalized policy,
+  and optional passing-suite evidence under a full SHA-256 manifest digest. Deployment loading
+  requires a separately trusted digest and application identifier.
+- `pack`, `verify-artifact`, and pinned `check` commands, with exclusive-create output and stable
+  allow/deny/invalid exit behavior. No release tag or public publication is implicit.
+- Public `guarded_call` enforces before invoking callbacks and supports a synchronous optional
+  minimized audit sink. Denial and audit failure prevent execution; no automatic retries or logs.
+- Actual temporary-file consumer (`examples/pinned_gateway.py`) and three-case file policy suite.
+- Direct Request values validate fields/context before freezing. Mixed-key batch errors remain
+  structured; diagnostic accumulation stops at its budget. Unpaired Unicode surrogates and
+  >4,096-bit integers are rejected; policy hashing streams JSON chunks.
+- Self-contained offline schemas resolve only packaged resources. Raw schema IDs are identifiers,
+  not promises of a deployed `schemas.samsarix.com` service.
+- The distribution verifier checks both archive inventories and exercises every command from an
+  isolated wheel install. Linux and Windows CI use that same verifier.
+- Development pip is constrained to `>=26.2,<27` after the audit reported `PYSEC-2026-3721` against
+  pip 26.1.2. Upgraded locally to 26.2.1 and re-audited: no known vulnerabilities (unpublished local
+  package skipped). Runtime dependencies remain empty.
+
+Local verification: formatting, lint and strict mypy passed; 150 tests passed with 93.15%
+branch-aware coverage. Wheel and sdist build/Twine checks and isolated installed journeys passed.
+Final distribution checks use `python scripts/verify_distribution.py --dist
+dist/candidate-20260831-final`; exact final artifact hashes and CI results belong in the PR record.
+
+### Remaining owner-controlled release gates
+
+1. Confirm license parameters with the owner/counsel. The standard BUSL body and 1,000-evaluation
+   grant were not changed in this increment. No commercial agreement has been fabricated.
+2. Confirm the PyPI project belongs to Samsarix LLC; configure a trusted publisher tied to
+   `Deathcharge/policy-engine`, the release workflow, and protected `pypi` environment; approve
+   publication explicitly. Public-install evidence cannot exist before publication.
+3. Supply production-consumer/representative-user and independent-review evidence before claiming
+   production adoption. The local reference consumer is not a production customer.
+
+Repository migration is optional: keeping `Deathcharge/policy-engine` preserves working history and
+links. A later owner-directed transfer can update URLs without changing Python imports or package
+identity. No other repository, website, account, infrastructure, or Git history was changed.
+
+### Ordered post-candidate work
+
+1. Representative integration trials: attribute construction, enforcement coverage, expected load,
+   licensing fit, and support expectations.
+2. Measured benchmark corpus and workload-specific batch/explanation limits if needed.
+3. Framework adapters driven by those trials; signing/hot reload only with explicit requirements.
+   No general-purpose hosted control plane is planned for this library.
+
+Disposition: **engineering release candidate with named external gates**, not a published or
+independently production-validated offering. Optional roadmap items are not core-path placeholders.

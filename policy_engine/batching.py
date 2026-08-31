@@ -88,7 +88,7 @@ def parse_batch(data: object) -> BatchRequest:
     if not isinstance(data, Mapping):
         raise BatchValidationError(["batch must be an object"])
     issues: list[str] = []
-    unknown = sorted(set(data) - {"schema_version", "requests"})
+    unknown = sorted(str(key) for key in set(data) - {"schema_version", "requests"})
     issues.extend(f"batch contains unknown field {field!r}" for field in unknown[:MAX_BATCH_ISSUES])
     schema_version = data.get("schema_version")
     if schema_version != 1 or isinstance(schema_version, bool):
@@ -104,6 +104,8 @@ def parse_batch(data: object) -> BatchRequest:
     requests: list[Request] = []
     seen_ids: set[str] = set()
     for index, raw_request in enumerate(raw_requests[:MAX_BATCH_REQUESTS]):
+        if len(issues) >= MAX_BATCH_ISSUES:
+            break
         label = f"batch.requests[{index}]"
         if not isinstance(raw_request, Mapping):
             issues.append(f"{label} must be an object")

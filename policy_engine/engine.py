@@ -162,8 +162,11 @@ def _policy_document(policy: Policy) -> dict[str, Any]:
 
 
 def _digest(value: Any) -> str:
-    encoded = json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
-    return hashlib.sha256(encoded).hexdigest()[:32]
+    digest = hashlib.sha256()
+    encoder = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    for chunk in encoder.iterencode(value):
+        digest.update(chunk.encode("utf-8"))
+    return digest.hexdigest()[:32]
 
 
 class PolicyEngine:

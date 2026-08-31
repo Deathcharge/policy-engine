@@ -131,3 +131,60 @@ def test_policy_test_command_reports_passes_and_assertion_failures(tmp_path, cap
     report = json.loads(capsys.readouterr().out)
     assert report["passed"] is False
     assert report["failed_count"] == 1
+
+
+def test_artifact_cli_journey_and_no_overwrite(tmp_path, capsys):
+    policy, allowed, denied = write_documents(tmp_path)
+    artifact = tmp_path / "artifact.json"
+    pack_args = [
+        "pack",
+        "-p",
+        str(policy),
+        "--revision",
+        "r1",
+        "--application",
+        "cli-v1",
+        "--output",
+        str(artifact),
+    ]
+    assert main(pack_args) == EXIT_ALLOWED
+    digest = json.loads(capsys.readouterr().out)["sha256"]
+    original = artifact.read_bytes()
+    pins = ["--artifact", str(artifact), "--sha256", digest, "--application", "cli-v1"]
+    assert main(["verify-artifact", *pins, "--pretty"]) == EXIT_ALLOWED
+    assert json.loads(capsys.readouterr().out)["valid"]
+    assert main(["check", *pins, "-r", str(allowed)]) == EXIT_ALLOWED
+    assert json.loads(capsys.readouterr().out)["allowed"]
+    assert main(["check", *pins, "-r", str(denied)]) == EXIT_DENIED
+    assert not json.loads(capsys.readouterr().out)["allowed"]
+    assert main(pack_args) == EXIT_INVALID
+    assert capsys.readouterr().out == ""
+    assert artifact.read_bytes() == original
+    pins[3] = "0" * 64
+    assert main(["verify-artifact", *pins]) == EXIT_INVALID
+    assert capsys.readouterr().out == ""
+
+
+@pytest.mark.parametrize("source", [["--artifact", "p"], ["--policy", "p", "--sha256", "0" * 64]])
+def test_artifact_check_requires_complete_pins(source, capsys):
+    with pytest.raises(SystemExit) as error:
+        main(["check", *source, "-r", "r"])
+    assert error.value.code == EXIT_INVALID
+    assert capsys.readouterr().out == ""
+
+
+def test_cli_batch_decisions_and_validation_atomicity(tmp_path, capsys):
+    policy, allowed, _ = write_documents(tmp_path)
+    request = json.loads(allowed.read_text())
+    request["request_id"] = "one"
+    batch = tmp_path / "batch.json"
+    batch.write_text(json.dumps({"schema_version": 1, "requests": [request]}))
+    args = ["batch", "-p", str(policy), "-b", str(batch), "--explain"]
+    assert main(args) == EXIT_ALLOWED
+    output = json.loads(capsys.readouterr().out)
+    assert output["decisions"][0]["evaluations"]
+    batch.write_text(json.dumps({"schema_version": 1, "requests": [request, {}]}))
+    assert main(args) == EXIT_INVALID
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "batch.requests[1]" in captured.err

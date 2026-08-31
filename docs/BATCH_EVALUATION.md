@@ -6,6 +6,10 @@ Batch evaluation amortizes policy loading when a gateway, agent, or job must aut
 samsarix-policy batch --policy examples/policy.json --batch examples/request.batch.json --pretty
 ```
 
-Input contains 1–1,000 requests and is limited to 2 MiB. Every request needs a unique, non-null `request_id`; decisions retain input order. Malformed entries reject the whole batch with exit code `2`. A valid batch exits `0` even when individual decisions deny access; inspect each decision.
+Input contains 1–1,000 requests; file loading through `load_batch` and the CLI is limited to 2 MiB.
+In-memory construction enforces request count plus each request's field/context limits instead.
+Every request needs a unique, non-null `request_id`; decisions retain input order. Malformed entries
+reject the whole batch with exit code `2`. A valid batch exits `0` even when individual decisions
+deny access; inspect each decision.
 
 Library consumers call `parse_batch` or `load_batch`, then `evaluate_batch(engine, batch)`. Enable explanations only for diagnostics because output scales with request and rule counts. Enforce every decision immediately before its corresponding action.

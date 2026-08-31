@@ -16,6 +16,12 @@ until the owner publishes a release.
 - Policy, request, decision, and policy-test JSON Schemas with validated examples.
 - Schema-validated policy test suites, a stable test report API, and `samsarix-policy test` for CI.
 - Correlation-safe batch evaluation for up to 1,000 requests through the API and CLI.
+- Versioned policy artifacts with full SHA-256 manifest pins, application contracts, optional
+  passing-suite evidence, and `pack` / `verify-artifact` / pinned `check` commands.
+- Public fail-closed `guarded_call` and opt-in minimized audit events; actual pinned-file consumer.
+- Self-contained offline schemas and automated wheel/sdist inventories plus installed journeys.
+- Direct Request construction now validates fields and bounded contexts before freezing; mixed-key
+  batch errors remain structured; unpaired surrogates and integers over 4,096 bits are rejected.
 - A regression-tested agent-tool enforcement example covering explicit allow, explicit deny,
   default deny, overlapping rules, environment boundaries, and approvals.
 - Examples, tests, pinned CI, dependency maintenance, candidate-artifact automation, structured

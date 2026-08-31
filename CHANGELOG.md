@@ -22,6 +22,7 @@ until the owner publishes a release.
 - Self-contained offline schemas and automated wheel/sdist inventories plus installed journeys.
 - Optional pyperf benchmark harness with 20 correctness-checked synthetic workloads, source/input
   fingerprints, explicit timing boundaries, and cross-platform runner verification.
+- Dependency auditing and a bounded job in the non-publishing release-artifact workflow.
 - Direct Request construction now validates fields and bounded contexts before freezing; mixed-key
   batch errors remain structured; unpaired surrogates and integers over 4,096 bits are rejected.
 - A regression-tested agent-tool enforcement example covering explicit allow, explicit deny,
